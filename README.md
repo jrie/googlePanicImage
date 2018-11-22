@@ -7,3 +7,6 @@ Once GooglePanicImages is enabled, a 'View' button is displayed on top of images
 The 'View' button is displayed at the regular search and details view of the Google Image search, if possible.
 
 At the detailed image view, thumbnails can be directly accessed using ***Ctrl + left click***.
+
+## Download
+The addon can be downloaded for Firefox on https://addons.mozilla.org/en-US/firefox/addon/googlepanicimages/
