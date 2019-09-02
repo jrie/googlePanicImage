@@ -22,11 +22,18 @@ let largePreview = null
 // ----------------------------------------------------------------------------------------
 
 // RegExParsers
+/*
 let imgRegExBase = /imgurl=(http[s]{0,1}%3A.*\?\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
 let imgRegExRef = /imgurlref=(http[s]{0,1}%3A.*\?\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
 let imgRegExBaseNoImage = /imgurl=(http[s]{0,1}%3A.[^\&\?]*)/i
+*/
 
-let imgSrcRegEx = /(http[s]{0,1}:\/\/.*(jpg|jpeg|gif|png|webm|svg|tiff))/i
+let imgRegExBase = /imgurl=(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
+let imgRegExRef = /imgurlref=(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
+let imgRegExRef2 = /imgrefurl=(http[s]{0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
+let imgRegExBaseNoImage = /imgurl=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
+
+let imgSrcRegEx = /(http[s]{0,1}(%3a|:)\/\/.*(jpg|jpeg|gif|png|webm|svg|tiff))/i
 
 // Gathers all images and adds a "view" link to the direct picture url
 function rewampImgs () {
@@ -44,10 +51,13 @@ function rewampImgs () {
       let srcImage = img.children[0].children[0]
       if (srcImage.src === '') continue
 
-      let imgURL = imgSrcRegEx.exec(srcImage.src)[1]
-      img.parentNode.addEventListener('mouseenter', overlayControls)
-      img.parentNode.addEventListener('mouseleave', hideControls)
-      img.parentNode.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:70%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:2% 3% 2% 2%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
+      let imgURL = imgSrcRegEx.exec(srcImage.src)
+      if (imgURL !== null) {
+        imgURL = imgURL[1]
+        img.parentNode.addEventListener('mouseenter', overlayControls)
+        img.parentNode.addEventListener('mouseleave', hideControls)
+        img.parentNode.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:70%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:2% 3% 2% 2%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
+      }
     }
   }
 
@@ -60,17 +70,21 @@ function rewampImgs () {
       imgURL = imgRegExRef.exec(img.href)
 
       if (imgURL === null) {
-        imgURL = imgRegExBaseNoImage.exec(img.href)
+        imgURL = imgRegExRef2.exec(img.href)
 
         if (imgURL === null) {
-          if (img.href.indexOf('imgurl=') !== -1) {
-            img.style.border = '6px solid #000'
-            console.log('[ERROR in "rewampImgs" of google-panic-images"] The following image link could not be extracted:')
-            console.log(img)
-            console.log(img.href)
-          }
+          imgURL = imgRegExBaseNoImage.exec(img.href)
 
-          continue
+          if (imgURL === null) {
+            if (img.href.indexOf('imgurl=') !== -1) {
+              img.style.border = '6px solid #000'
+              console.log('[ERROR in "rewampImgs" of google-panic-images"] The following image link could not be extracted:')
+              console.log(img)
+              console.log(img.href)
+            }
+
+            continue
+          }
         }
       }
     }
