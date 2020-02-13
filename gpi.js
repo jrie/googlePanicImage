@@ -82,11 +82,14 @@ function rewampImgs () {
   }
 
   for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
-    btn.addEventListener('click', function (evt) {
-      evt.preventDefault()
-      window.open(evt.target.href, '_blank')
-    })
+    btn.removeEventListener('click', openImgLink)
+    btn.addEventListener('click', openImgLink)
   }
+}
+
+function openImgLink (evt) {
+  evt.preventDefault()
+  window.open(evt.target.href, '_blank')
 }
 
 function readURLforImg (imgLink) {
@@ -134,10 +137,8 @@ function readURLforImg (imgLink) {
   imgLink.parentNode.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:6%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:7px 8% 4px 5%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
 
   for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
-    btn.addEventListener('click', function (evt) {
-      evt.preventDefault()
-      window.open(evt.target.href, '_blank')
-    })
+    btn.removeEventListener('click', openImgLink)
+    btn.addEventListener('click', openImgLink)
   }
 }
 
