@@ -27,63 +27,68 @@ let imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 
 // Gathers all images and adds a "view" link to the direct picture url
 function rewampImgs () {
-  let imgLinks = document.querySelectorAll('div.isv-r')
+  try {
+    let imgLinks = document.querySelectorAll('div.isv-r')
 
-  let pageLoad = ''
-  pageLoad = document.children[0].outerHTML.replace(/[\n\t\r]{1,}/g, '')
+    let pageLoad = ''
+    pageLoad = document.children[0].outerHTML.replace(/[\n\t\r]{1,}/g, '')
 
-  for (let img of imgLinks) {
-    let imageID = img.dataset['id']
-    try {
-      img.dataset['irul'] = pageLoad.match(new RegExp('[0-9]?,"' + imageID + '",.*\],'))[0].split('"', 6)
-    } catch (e) {
-      continue
-    }
-
-    let imgURL = imgRegExBase.exec(img.dataset['irul'])
-
-    if (imgURL !== null && imgURL[1].startsWith('=')) imgURL = imgRegExBaseImage2.exec(img.dataset['irul'])
-
-    if (imgURL === null) {
-      imgURL = imgRegExBaseNoImage.exec(img.dataset['irul'])
-
-      if (imgURL === null) {
-        if (img.dataset['irul'] === '') {
-          img.style.border = '6px solid #000'
-          console.log('[ERROR in "rewampImgs" of google-panic-images"] The following image link could not be extracted:')
-          console.log(img)
-        }
-
+    for (let img of imgLinks) {
+      let imageID = img.dataset['id']
+      try {
+        img.dataset['irul'] = pageLoad.match(new RegExp('[0-9]?,"' + imageID + '",.*\],'))[0].split('"', 6)
+      } catch (err) {
         continue
       }
-    }
 
-    imgURL = imgURL[1]
+      let imgURL = imgRegExBase.exec(img.dataset['irul'])
 
-    if (imgURL.indexOf(')') !== -1) {
-      let imgData = img.dataset['irul'].split('/')
-      imgURL = decodeURIComponent('https://' + imgData[imgData.length - 1])
-    }
+      if (imgURL !== null && imgURL[1].startsWith('=')) imgURL = imgRegExBaseImage2.exec(img.dataset['irul'])
 
-    let hasControls = false
-    for (let child of img.childNodes) {
-      if (child.className === GOOGLE_PANIC_CLASS) {
-        hasControls = true
-        break
+      if (imgURL === null) {
+        imgURL = imgRegExBaseNoImage.exec(img.dataset['irul'])
+
+        if (imgURL === null) {
+          if (img.dataset['irul'] === '') {
+            img.style.border = '6px solid #000'
+            console.log('[ERROR in "rewampImgs" of google-panic-images"] The following image link could not be extracted:')
+            console.log(img)
+          }
+
+          continue
+        }
       }
+
+      imgURL = imgURL[1]
+
+      if (imgURL.indexOf(')') !== -1) {
+        let imgData = img.dataset['irul'].split('/')
+        imgURL = decodeURIComponent('https://' + imgData[imgData.length - 1])
+      }
+
+      let hasControls = false
+      for (let child of img.childNodes) {
+        if (child.className === GOOGLE_PANIC_CLASS) {
+          hasControls = true
+          break
+        }
+      }
+
+      if (hasControls) continue
+
+      imgURL = decodeURIComponent(imgURL)
+      img.addEventListener('mouseenter', overlayControls)
+      img.addEventListener('mouseleave', hideControls)
+
+      img.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:6%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:7px 8% 4px 5%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
     }
 
-    if (hasControls) continue
-
-    imgURL = decodeURIComponent(imgURL)
-    img.addEventListener('mouseenter', overlayControls)
-    img.addEventListener('mouseleave', hideControls)
-    img.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:6%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:7px 8% 4px 5%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
-  }
-
-  for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
-    btn.removeEventListener('click', openImgLink)
-    btn.addEventListener('click', openImgLink)
+    for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
+      btn.removeEventListener('click', openImgLink)
+      btn.addEventListener('click', openImgLink)
+    }
+  } catch (err) {
+    console.log(err)
   }
 }
 
@@ -93,67 +98,76 @@ function openImgLink (evt) {
 }
 
 function readURLforImg (imgLink) {
-  if (imgLink.href === '') return
+  try {
+    imgLink.dataset['irul'] = imgLink.href
 
-  imgLink.dataset['irul'] = imgLink.href
+    let imgURL = imgRegExBaseImg.exec(imgLink.dataset['irul'])
 
-  let imgURL = imgRegExBaseImg.exec(imgLink.dataset['irul'])
-
-  if (imgURL !== null && imgURL[1].startsWith('=')) imgURL = imgRegExBaseImage2Img.exec(imgLink.dataset['irul'])
-
-  if (imgURL === null) {
-    imgURL = imgRegExBaseNoImageImg.exec(imgLink.dataset['irul'])
+    if (imgURL !== null && imgURL[1].startsWith('=')) imgURL = imgRegExBaseImage2Img.exec(imgLink.dataset['irul'])
 
     if (imgURL === null) {
-      if (imgLink.dataset['irul'] === '') {
-        imgLink.parentNode.style.border = '6px solid #000'
-        console.log('[ERROR in "readURLforImg" of google-panic-images"] The following image link could not be extracted:')
-        console.log(imgLink)
+      imgURL = imgRegExBaseNoImageImg.exec(imgLink.dataset['irul'])
+
+      if (imgURL === null) {
+        if (imgLink.dataset['irul'] === '') {
+          imgLink.parentNode.style.border = '6px solid #000'
+          console.log('[ERROR in "readURLforImg" of google-panic-images"] The following image link could not be extracted:')
+          console.log(imgLink)
+        }
+
+        return
       }
     }
-  }
 
-  imgURL = imgURL[1]
+    imgURL = imgURL[1]
 
-  if (imgURL.indexOf(')') !== -1) {
-    let imgData = img.dataset['irul'].split('/')
-    imgURL = decodeURIComponent('https://' + imgData[imgData.length - 1])
-  }
-
-  let hasControls = false
-
-  for (let child of imgLink.parentNode.childNodes) {
-    if (child.className === GOOGLE_PANIC_CLASS) {
-      hasControls = true
-      break
+    if (imgURL.indexOf(')') !== -1) {
+      let imgData = imgLink.dataset['irul'].split('/')
+      imgURL = decodeURIComponent('https://' + imgData[imgData.length - 1])
     }
-  }
 
-  if (hasControls) return
+    let hasControls = false
 
-  imgURL = decodeURIComponent(imgURL)
-  imgLink.parentNode.addEventListener('mouseenter', overlayControls)
-  imgLink.parentNode.addEventListener('mouseleave', hideControls)
-  imgLink.parentNode.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:6%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:7px 8% 4px 5%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
+    for (let child of imgLink.parentNode.childNodes) {
+      if (child.className === GOOGLE_PANIC_CLASS) {
+        hasControls = true
+        break
+      }
+    }
 
-  for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
-    btn.removeEventListener('click', openImgLink)
-    btn.addEventListener('click', openImgLink)
+    if (hasControls) return
+
+    imgURL = decodeURIComponent(imgURL)
+    imgLink.parentNode.addEventListener('mouseenter', overlayControls)
+    imgLink.parentNode.addEventListener('mouseleave', hideControls)
+    imgLink.parentNode.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:6%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:7px 8% 4px 5%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
+
+    for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
+      btn.removeEventListener('click', openImgLink)
+      btn.addEventListener('click', openImgLink)
+    }
+  } catch (err) {
+    console.log(err)
   }
 }
 
 function rewampImgs2 () {
-  let imgLinks = document.querySelectorAll('div#islsp div.isv-r a:nth-of-type(1)')
+  let imgLinks = document.querySelectorAll('div#islsp div.isv-r > a')
 
   for (let imgLink of imgLinks) {
     if (imgLink.dataset['navigation'] !== undefined) continue
-    imgLink.parentNode.parentNode.addEventListener('mouseenter', function (evt) {
-      readURLforImg(evt.target.parentNode.parentNode)
-    })
+    imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
+    imgLink.addEventListener('click', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
+  }
+}
 
-    imgLink.parentNode.parentNode.addEventListener('click', function (evt) {
-      readURLforImg(evt.target.parentNode.parentNode)
-    })
+function rewampImgs3 () {
+  let imgLinks = document.querySelectorAll('div#islrg div.isv-r > a')
+
+  for (let imgLink of imgLinks) {
+    if (imgLink.dataset['navigation'] !== undefined) continue
+    imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
+    imgLink.addEventListener('click', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
   }
 }
 
@@ -169,24 +183,30 @@ function waitForLoaded () {
   if (Date.now() > fireAt) {
     try {
       rewampImgs()
-    } catch (e) {
+    } catch (err) {
       console.log('[ERROR] in script, function rewampImgs():')
-      console.log(e)
+      console.log(err)
     }
 
     try {
       rewampImgs2()
-    } catch (e) {
+    } catch (err) {
       console.log('[ERROR] in script, function rewampImgs2():')
-      console.log(e)
+      console.log(err)
+    }
+
+    try {
+      rewampImgs3()
+    } catch (err) {
+      console.log('[ERROR] in script, function rewampImgs3():')
+      console.log(err)
     }
 
     try {
       let imgs = document.querySelectorAll('div#islsp div.isv-r')
-      for (let img of imgs) {
-        img.addEventListener('click', resetFire)
-      }
-    } catch (e) {
+      for (let img of imgs) img.addEventListener('click', resetFire)
+    } catch (err) {
+      console.log(err)
     }
 
     fireAt = Date.now() + (SECONDS_TO_FIRE * 1000)
