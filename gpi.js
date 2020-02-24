@@ -80,7 +80,26 @@ function rewampImgs () {
       img.addEventListener('mouseenter', overlayControls)
       img.addEventListener('mouseleave', hideControls)
 
-      img.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:6%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:7px 8% 4px 5%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
+      let domButton = document.createElement('a')
+      domButton.target = '_blank'
+      domButton.href = imgURL
+      domButton.className = GOOGLE_PANIC_CLASS
+      domButton.appendChild(document.createTextNode('View'))
+      domButton.style['visibility'] = 'hidden'
+      domButton.style['position'] = 'absolute'
+      domButton.style['top'] = '6%'
+      domButton.style['left'] = '0px'
+      domButton.style['background'] = 'rgba(0,0,0,0.6)'
+      domButton.style['color'] = '#fff'
+      domButton.style['font-weight'] = 'bold'
+      domButton.style['padding'] = '7px 8% 4px 5%'
+      domButton.style['border-radius'] = '0px 12px 12px 0px'
+      domButton.style['z-index'] = '1'
+      domButton.style['font-size'] = '12px'
+      domButton.style['text-decoration'] = 'none'
+      domButton.style['border'] = '1px solid #aaa'
+      domButton.style['border-left'] = 'none'
+      img.appendChild(domButton)
     }
 
     for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
@@ -140,7 +159,27 @@ function readURLforImg (imgLink) {
     imgURL = decodeURIComponent(imgURL)
     imgLink.parentNode.addEventListener('mouseenter', overlayControls)
     imgLink.parentNode.addEventListener('mouseleave', hideControls)
-    imgLink.parentNode.innerHTML += '<a target="_blank" class="' + GOOGLE_PANIC_CLASS + '" style="visibility:hidden;position:absolute;top:6%;left:0%;background:rgba(0,0,0,0.6);color:#fff;font-weight:bold;padding:7px 8% 4px 5%;border-radius:0px 12px 12px 0px;z-index:1;font-size:12px;text-decoration:none;border:1px solid #aaa;border-left: none;" href="' + imgURL + '">VIEW</a>'
+
+    let domButton = document.createElement('a')
+    domButton.target = '_blank'
+    domButton.href = imgURL
+    domButton.className = GOOGLE_PANIC_CLASS
+    domButton.appendChild(document.createTextNode('View'))
+    domButton.style['visibility'] = 'hidden'
+    domButton.style['position'] = 'absolute'
+    domButton.style['top'] = '6%'
+    domButton.style['left'] = '0px'
+    domButton.style['background'] = 'rgba(0,0,0,0.6)'
+    domButton.style['color'] = '#fff'
+    domButton.style['font-weight'] = 'bold'
+    domButton.style['padding'] = '7px 8% 4px 5%'
+    domButton.style['border-radius'] = '0px 12px 12px 0px'
+    domButton.style['z-index'] = '1'
+    domButton.style['font-size'] = '12px'
+    domButton.style['text-decoration'] = 'none'
+    domButton.style['border'] = '1px solid #aaa'
+    domButton.style['border-left'] = 'none'
+    imgLink.parentNode.appendChild(domButton)
 
     for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
       btn.removeEventListener('click', openImgLink)
