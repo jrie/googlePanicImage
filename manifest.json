@@ -3,11 +3,11 @@
     "name": "JanRie",
     "url": "https://github.com/jrie"
   },
-  "description": "Displays a 'view' link above images from Google image search",
+  "description": "Displays a 'view' link above images of Google image search",
   "homepage_url": "https://github.com/jrie/google-panic-image",
   "manifest_version": 2,
   "name": "GooglePanicImages",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "permissions": ["<all_urls>"],
   "content_scripts": [
 	{

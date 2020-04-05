@@ -17,13 +17,14 @@ let fireAt = 0
 // ----------------------------------------------------------------------------------------
 
 // RegExParsers
-let imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
-let imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
+let imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBase1 = /imgurl=((http[s]){0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
 let imgRegExBaseNoImage = /\[,(http[s]{0,1}(%3a|:).[^&\?]*)/i
 let imgRegExBaseNoImage2 = /=(http[s]{0,1}(%3a|:).[^&\?]*)/i
 
-let imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
-let imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff))/i
+let imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
 let imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 
 // Gathers all images and adds a "VIEW" link to the direct picture url
@@ -43,8 +44,11 @@ function rewampImgs () {
       } catch (err) {
         continue
       }
+      let imgURL = imgRegExBase1.exec(img.children[0].href)
+      if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(img.dataset['irul'])
+      if (imgURL === '' || imgURL === null) imgURL = imgRegExBase2.exec(img.children[0].href)
 
-      let imgURL = imgRegExBase2.exec(img.dataset['irul'])
+      if (imgURL === null) imgURL = imgRegExBase2.exec(img.dataset['irul'])
       if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
       if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(img.dataset['irul'])
@@ -57,18 +61,20 @@ function rewampImgs () {
         if (imgURL === null) {
           imgURL = imgRegExBaseNoImage.exec(img.dataset['irul'])
           if (imgURL === null) {
-            if (img.dataset['irul'] === '') {
+            if (imgURL === null) {
               img.style.border = '6px solid #000'
               console.log('[ERROR in "rewampImgs" of google-panic-images"] The following image link could not be extracted:')
               console.log(img)
+
+              continue
             }
 
-            continue
           }
         }
       }
 
       imgURL = imgURL[1]
+      console.log(imgURL)
 
       if (imgURL.indexOf(')') !== -1) {
         let imgData = img.dataset['irul'].split('/')
