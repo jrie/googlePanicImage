@@ -61,20 +61,16 @@ function rewampImgs () {
         if (imgURL === null) {
           imgURL = imgRegExBaseNoImage.exec(img.dataset['irul'])
           if (imgURL === null) {
-            if (imgURL === null) {
-              img.style.border = '6px solid #000'
-              console.log('[ERROR in "rewampImgs" of google-panic-images"] The following image link could not be extracted:')
-              console.log(img)
+            img.style.border = '6px solid #000'
+            console.log('[ERROR in "rewampImgs" of google-panic-images"] The following image link could not be extracted:')
+            console.log(img)
 
-              continue
-            }
-
+            continue
           }
         }
       }
 
       imgURL = imgURL[1]
-      console.log(imgURL)
 
       if (imgURL.indexOf(')') !== -1) {
         let imgData = img.dataset['irul'].split('/')
