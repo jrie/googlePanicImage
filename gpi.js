@@ -17,14 +17,14 @@ let fireAt = 0
 // ----------------------------------------------------------------------------------------
 
 // RegExParsers
-let imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
 let imgRegExBase1 = /imgurl=((http[s]){0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
-let imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
-let imgRegExBaseNoImage = /\[,(http[s]{0,1}(%3a|:).[^&\?]*)/i
-let imgRegExBaseNoImage2 = /=(http[s]{0,1}(%3a|:).[^&\?]*)/i
+let imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBaseNoImage = /\[,(http[s]{0,1}(%3a|:).[^\&\?]*)/i
+let imgRegExBaseNoImage2 = /=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 
-let imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
-let imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
 let imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 
 // Gathers all images and adds a "VIEW" link to the direct picture url
