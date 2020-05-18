@@ -17,15 +17,17 @@ let fireAt = 0
 // ----------------------------------------------------------------------------------------
 
 // RegExParsers
-let imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
 let imgRegExBase1 = /imgurl=((http[s]){0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
-let imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
-let imgRegExBaseNoImage = /\[,(http[s]{0,1}(%3a|:).[^\&\?]*)/i
-let imgRegExBaseNoImage2 = /=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
+let imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBaseNoImage = /imgurl=(http[s]{0,1}(%3a|:).[^\&]*)/i
+let imgRegExBaseNoImage1 = /imgurl=\[,(http[s]{0,1}(%3a|:).[^\&]*)/i
+let imgRegExBaseNoImage2 = /\[,(http[s]{0,1}(%3a|:).[^\&]*)/i
+let imgRegExBaseNoImage3 = /=(http[s]{0,1}(%3a|:).[^\&]*)/i
 
-let imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
-let imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
-let imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&\?]*)/i
+let imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp))/i
+let imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&]*)/i
 
 // Gathers all images and adds a "VIEW" link to the direct picture url
 function rewampImgs () {
@@ -51,11 +53,18 @@ function rewampImgs () {
       if (imgURL === null) imgURL = imgRegExBase2.exec(img.dataset['irul'])
       if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
+      if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(img.dataset['irul'])
+      if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
       if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(img.dataset['irul'])
       if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
       if (imgURL === null) {
-        imgURL = imgRegExBase.exec(img.dataset['irul'])
+
+        if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(img.dataset['irul'])
+        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
+        if (imgURL === null) imgURL = imgRegExBase.exec(img.dataset['irul'])
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
         if (imgURL === null) {
