@@ -15,10 +15,11 @@ let GOOGLE_PANIC_CLASS = 'Google-panic-image-btn-new'
 // ----------------------------------------------------------------------------------------
 let fireAt = 0
 // ----------------------------------------------------------------------------------------
+// https://www.google.de/imgres?imgurl=https://dccdn.de/www.doccheck.com/data/69/p7/ha/cl/4f/j2/camp-test-for-listeria1_mdSq.jpg&imgrefurl=https://flexikon.doccheck.com/de/Test&tbnid=3BRWfymFqrkIVM&vet=10CB0QMyh2ahcKEwiot5_Gz8jsAhUAAAAAHQAAAAAQAg..i&docid=DyRqzaU0mfVYKM&w=240&h=240&q=test&ved=0CB0QMyh2ahcKEwiot5_Gz8jsAhUAAAAAHQAAAAAQAg
 
 // RegExParsers
 let imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-let imgRegExBase1 = /imgurl=((http[s]){0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
+let imgRegExBase1 = /imgurl=(http[s]{0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
 let imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
 let imgRegExBaseNoImage = /imgurl=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 let imgRegExBaseNoImage1 = /imgurl=\[,(http[s]{0,1}(%3a|:).[^"\&\?"]*)/i
@@ -71,9 +72,6 @@ function rewampImgs () {
           imgURL = imgRegExBaseNoImage.exec(img.dataset['irul'])
           if (imgURL === null) {
             img.style.border = '6px solid #000'
-            console.log('[ERROR in "rewampImgs" of google-panic-images"] The following image link could not be extracted:')
-            console.log(img)
-
             continue
           }
         }
