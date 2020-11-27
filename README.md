@@ -11,4 +11,4 @@ At the detailed image view, thumbnails can be directly accessed using ***Ctrl + 
 ## Download
 The addon can be downloaded for Firefox on https://addons.mozilla.org/en-US/firefox/addon/googlepanicimages/
 
-Chrome and opera can be found at the releases: https://github.com/jrie/googlePanicImage/releases
+Chrome and Opera using the Google Webstore: https://chrome.google.com/webstore/detail/googlepanicimages/ofnokbendbpfgbomaepcomeciblhphip
