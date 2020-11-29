@@ -76,12 +76,6 @@ function rewampImgs () {
         }
       }
 
-      imgURL = imgURL[1]
-
-      if (imgURL.indexOf(')') !== -1) {
-        let imgData = img.dataset['irul'].split('/')
-        imgURL = decodeURIComponent('https://' + imgData[imgData.length - 1])
-      }
 
       let hasControls = false
       for (let child of img.childNodes) {
@@ -93,7 +87,20 @@ function rewampImgs () {
 
       if (hasControls) continue
 
-      imgURL = decodeURIComponent(imgURL)
+      imgURL = imgURL[1]
+
+      try {
+        for (let entry of imgURL.match(/[\\]{1,}u[a-fA-F0-9]*/g)) {
+          imgURL = imgURL.replace(entry, String.fromCharCode(parseInt(entry.replace('\\u', ''), 16)))
+        }
+      } catch (err) {
+        if (imgURL.indexOf(')') !== -1) {
+          let imgData = img.dataset['irul'].split('/')
+          imgURL = 'https://' + decodeURIComponent(imgData[imgData.length - 1])
+        } else {
+          imgURL = decodeURIComponent(imgURL)
+        }
+      }
 
       let domButton = document.createElement('a')
       domButton.target = '_blank'
@@ -120,7 +127,6 @@ function rewampImgs () {
       img.addEventListener('mouseenter', overlayControls)
       img.addEventListener('mousemove', overlayControls)
       img.addEventListener('mouseleave', hideControls)
-
     }
 
     for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
