@@ -4,7 +4,7 @@
     "url": "https://github.com/jrie"
   },
   "description": "Displays a 'view' link above images of Google image search",
-  "homepage_url": "https://github.com/jrie/google-panic-image",
+  "homepage_url": "https://github.com/jrie/googlePanicImage",
   "manifest_version": 2,
   "name": "GooglePanicImages",
   "version": "2.0.14",
