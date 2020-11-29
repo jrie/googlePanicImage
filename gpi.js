@@ -29,15 +29,19 @@ let imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|
 let imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
 let imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 
+let imgFacebook = /(http[s]{0,1}(%3a|:)\/\/lookaside\.fbsbx\.com\/lookaside\/crawler\/media\/.*)/i
+
 // Gathers all images and adds a "VIEW" link to the direct picture url
 function rewampImgs () {
   try {
     let imgLinks = document.querySelectorAll('div.isv-r')
+    let isFacebook = false
 
     let pageLoad = ''
     pageLoad = document.children[0].outerHTML.replace(/[\n\t\r]{1,}/g, '')
 
     for (let img of imgLinks) {
+      isFacebook = false
       let imageID = img.dataset['id']
       try {
         let imgData = pageLoad.match(new RegExp('[0-9]?,"' + imageID + '",.*\],'))[0].split('"', 6)
@@ -46,36 +50,42 @@ function rewampImgs () {
       } catch (err) {
         continue
       }
+
       let imgURL = imgRegExBase1.exec(img.children[0].href)
-      if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(img.dataset['irul'])
-      if (imgURL === '' || imgURL === null) imgURL = imgRegExBase2.exec(img.children[0].href)
-
-      if (imgURL === null) imgURL = imgRegExBase2.exec(img.dataset['irul'])
-      if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-      if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(img.dataset['irul'])
-      if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-      if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(img.dataset['irul'])
-      if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
       if (imgURL === null) {
+        imgURL = imgFacebook.exec(img.dataset['irul']);
+        if (imgURL !== null) isFacebook = true;
+      }
 
-        if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(img.dataset['irul'])
+      if (!isFacebook) {
+        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(img.dataset['irul'])
+        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase2.exec(img.children[0].href)
+
+        if (imgURL === null) imgURL = imgRegExBase2.exec(img.dataset['irul'])
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
-        if (imgURL === null) imgURL = imgRegExBase.exec(img.dataset['irul'])
+        if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(img.dataset['irul'])
+        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
+        if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(img.dataset['irul'])
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
         if (imgURL === null) {
-          imgURL = imgRegExBaseNoImage.exec(img.dataset['irul'])
+          if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(img.dataset['irul'])
+          if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
+          if (imgURL === null) imgURL = imgRegExBase.exec(img.dataset['irul'])
+          if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
           if (imgURL === null) {
-            img.style.border = '6px solid #000'
-            continue
+            imgURL = imgRegExBaseNoImage.exec(img.dataset['irul'])
+            if (imgURL === null) {
+              img.style.border = '6px solid #000'
+              continue
+            }
           }
         }
       }
-
 
       let hasControls = false
       for (let child of img.childNodes) {
@@ -86,13 +96,9 @@ function rewampImgs () {
       }
 
       if (hasControls) continue
-
       imgURL = imgURL[1]
-
       try {
-        for (let entry of imgURL.match(/[\\]{1,}u[a-fA-F0-9]*/g)) {
-          imgURL = imgURL.replace(entry, String.fromCharCode(parseInt(entry.replace('\\u', ''), 16)))
-        }
+        for (let entry of imgURL.match(/[\\]{1,}u[a-fA-F0-9]{0,4}/gi)) imgURL = imgURL.replace(entry, String.fromCharCode(parseInt(entry.replace(/\\u/gi, ''), 16)))
       } catch (err) {
         if (imgURL.indexOf(')') !== -1) {
           let imgData = img.dataset['irul'].split('/')
@@ -101,6 +107,7 @@ function rewampImgs () {
           imgURL = decodeURIComponent(imgURL)
         }
       }
+
 
       let domButton = document.createElement('a')
       domButton.target = '_blank'
