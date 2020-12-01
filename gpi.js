@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------------------------------
 
 // Seconds, when the script should scan the search page for new images
-let SECONDS_TO_FIRE = 3
+let SECONDS_TO_FIRE = 1.25
 let SECONDS_TO_FIRE_CUT = SECONDS_TO_FIRE * 0.35
 
 // Our panic class (buttons)
@@ -283,8 +283,8 @@ function rewampImgs3 () {
 
   for (let imgLink of imgLinks) {
     if (imgLink.dataset['navigation'] !== undefined) continue
+    if (hasControls(imgLink.parentNode)) continue
     else {
-      if (hasControls(imgLink.parentNode)) continue
       imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
       imgLink.addEventListener('click', function (evt) {
         if (!hasControls(evt.target.parentNode.parentNode.parentNode)) {
@@ -356,7 +356,10 @@ function waitForLoaded () {
 
     try {
       let imgs = document.querySelectorAll('div#islsp div.isv-r')
-      for (let img of imgs) img.addEventListener('click', resetFire)
+      for (let img of imgs) {
+        img.removeEventListener('click', resetFire)
+        img.addEventListener('click', resetFire)
+      }
     } catch (err) {
       console.log(err)
     }
