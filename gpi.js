@@ -269,7 +269,6 @@ function rewampImgs2 () {
     if (hasControls(imgLink.parentNode)) continue
 
     imgLink.addEventListener('click', function (evt) {
-      console.log('in2')
       if (!hasControls(evt.target.parentNode.parentNode.parentNode)) {
         evt.stopPropagation()
         evt.preventDefault()
@@ -288,7 +287,6 @@ function rewampImgs3 () {
       if (hasControls(imgLink.parentNode)) continue
       imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
       imgLink.addEventListener('click', function (evt) {
-        console.log('in3')
         if (!hasControls(evt.target.parentNode.parentNode.parentNode)) {
           evt.stopPropagation()
           evt.preventDefault()
@@ -308,7 +306,6 @@ function rewampImgs4 () {
     else {
       imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
       imgLink.addEventListener('click', function (evt) {
-        console.log('in4')
         if (!hasControls(evt.target.parentNode.parentNode)) {
           evt.stopPropagation()
           evt.preventDefault()
