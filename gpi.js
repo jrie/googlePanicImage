@@ -41,6 +41,9 @@ function rewampImgs () {
     pageLoad = document.children[0].outerHTML.replace(/[\n\t\r]{1,}/g, '')
 
     for (let img of imgLinks) {
+
+      if (hasControls(img)) continue
+
       isFacebook = false
       let imageID = img.dataset['id']
       try {
@@ -87,15 +90,6 @@ function rewampImgs () {
         }
       }
 
-      let hasControls = false
-      for (let child of img.childNodes) {
-        if (child.className === GOOGLE_PANIC_CLASS) {
-          hasControls = true
-          break
-        }
-      }
-
-      if (hasControls) continue
       imgURL = imgURL[1]
       try {
         for (let entry of imgURL.match(/[\\]{1,}u[a-fA-F0-9]{0,4}/gi)) imgURL = imgURL.replace(entry, String.fromCharCode(parseInt(entry.replace(/\\u/gi, ''), 16)))
@@ -108,7 +102,6 @@ function rewampImgs () {
         }
       }
 
-
       let domButton = document.createElement('a')
       domButton.target = '_blank'
       domButton.href = imgURL
@@ -117,12 +110,12 @@ function rewampImgs () {
       domButton.appendChild(document.createTextNode('VIEW'))
       domButton.style['visibility'] = 'hidden'
       domButton.style['position'] = 'absolute'
-      domButton.style['top'] = '6%'
+      domButton.style['top'] = '10%'
       domButton.style['left'] = '0px'
       domButton.style['background'] = 'rgba(0,0,0,0.6)'
       domButton.style['color'] = '#fff'
       domButton.style['font-weight'] = 'bold'
-      domButton.style['padding'] = '7px 8% 4px 5%'
+      domButton.style['padding'] = '0.5em 1.5em'
       domButton.style['border-radius'] = '0px 12px 12px 0px'
       domButton.style['z-index'] = '1'
       domButton.style['font-size'] = '12px'
@@ -130,6 +123,10 @@ function rewampImgs () {
       domButton.style['border'] = '1px solid #aaa'
       domButton.style['border-left'] = 'none'
       img.appendChild(domButton)
+
+      img.removeEventListener('mouseenter', overlayControls)
+      img.removeEventListener('mousemove', overlayControls)
+      img.removeEventListener('mouseleave', hideControls)
 
       img.addEventListener('mouseenter', overlayControls)
       img.addEventListener('mousemove', overlayControls)
@@ -152,45 +149,59 @@ function openImgLink (evt) {
 }
 
 function readURLforImg (imgLink) {
+
   try {
+    let imgSrc = null
+
     imgLink.dataset['irul'] = imgLink.href
-
-    let imgURL = imgRegExBaseImg.exec(imgLink.dataset['irul'])
-    if (imgURL !== null && imgURL[1].startsWith('=')) imgURL = imgRegExBaseImage2Img.exec(imgLink.dataset['irul'])
-
-    if (imgURL === null) {
-      imgURL = imgRegExBaseNoImageImg.exec(imgLink.dataset['irul'])
-
-      if (imgURL === null) {
-        if (imgLink.dataset['irul'] === '') {
-          imgLink.parentNode.style.border = '6px solid #000'
-          console.log('[ERROR in "readURLforImg" of google-panic-images"] The following image link could not be extracted:')
-          console.log(imgLink)
-        }
-
-        return
-      }
-    }
-
-    imgURL = imgURL[1]
-
-    if (imgURL.indexOf(')') !== -1) {
-      let imgData = imgLink.dataset['irul'].split('/')
-      imgURL = decodeURIComponent('https://' + imgData[imgData.length - 1])
-    }
-
-    let hasControls = false
-
-    for (let child of imgLink.parentNode.childNodes) {
-      if (child.className === GOOGLE_PANIC_CLASS) {
-        hasControls = true
+    for (let child of imgLink.childNodes) {
+      if (child.getAttribute('src') !== null) {
+        imgSrc = child.getAttribute('src')
         break
       }
     }
 
-    if (hasControls) return
+    let isFacebook = false
+    let imgURL = null
+    if (imgSrc !== null) {
+      imgURL = imgSrc
+    } else {
+      imgURL = imgRegExBase1.exec(imgLink.href)
+      if (imgURL === null) {
+        imgURL = imgFacebook.exec(imgLink.dataset['irul']);
+        if (imgURL !== null) isFacebook = true;
+      }
 
-    imgURL = decodeURIComponent(imgURL)
+      if (!isFacebook) {
+        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(imgLink.dataset['irul'])
+        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase2.exec(imgLink.parentNode.children[0].href)
+
+        if (imgURL === null) imgURL = imgRegExBase2.exec(imgLink.dataset['irul'])
+        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
+        if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(imgLink.dataset['irul'])
+        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
+        if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(imgLink.dataset['irul'])
+        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
+        if (imgURL === null) {
+          if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(imgLink.dataset['irul'])
+          if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+
+          if (imgURL === null) imgURL = imgRegExBase.exec(imgLink.dataset['irul'])
+          if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+        }
+      }
+      if (imgURL === null) return
+
+      imgURL = imgURL[1]
+    }
+
+    if (imgURL.indexOf(')') !== -1) {
+      let imgData = imgLink.dataset['irul'].split('/')
+      imgURL = 'https://' + decodeURIComponent(imgData[imgData.length - 1])
+    } else imgURL = decodeURIComponent(imgURL)
 
     let domButton = document.createElement('a')
     domButton.target = '_blank'
@@ -200,12 +211,13 @@ function readURLforImg (imgLink) {
     domButton.appendChild(document.createTextNode('VIEW'))
     domButton.style['visibility'] = 'hidden'
     domButton.style['position'] = 'absolute'
-    domButton.style['top'] = '6%'
+    domButton.style['top'] = '10%'
     domButton.style['left'] = '0px'
     domButton.style['background'] = 'rgba(0,0,0,0.6)'
     domButton.style['color'] = '#fff'
     domButton.style['font-weight'] = 'bold'
-    domButton.style['padding'] = '7px 8% 4px 5%'
+    if (imgSrc === null) domButton.style['padding'] = '0.65em 2em'
+    else domButton.style['padding'] = '1.25em 2em'
     domButton.style['border-radius'] = '0px 12px 12px 0px'
     domButton.style['z-index'] = '1'
     domButton.style['font-size'] = '12px'
@@ -219,6 +231,10 @@ function readURLforImg (imgLink) {
       btn.addEventListener('click', openImgLink)
     }
 
+    imgLink.parentNode.removeEventListener('mouseenter', overlayControls)
+    imgLink.parentNode.removeEventListener('mousemove', overlayControls)
+    imgLink.parentNode.removeEventListener('mouseleave', hideControls)
+
     imgLink.parentNode.addEventListener('mouseenter', overlayControls)
     imgLink.parentNode.addEventListener('mousemove', overlayControls)
     imgLink.parentNode.addEventListener('mouseleave', hideControls)
@@ -229,19 +245,36 @@ function readURLforImg (imgLink) {
   }
 }
 
+function hasControls(parentNode) {
+  try {
+    let childNodeCount = parentNode.childNodes.length
+    let nodes = parentNode.childNodes;
+    for (let x = childNodeCount - 1; x >= 0; --x) {
+      if (nodes[x].className === GOOGLE_PANIC_CLASS) {
+        return true
+      }
+    }
+    return false
+  } catch (err) {
+    console.log(err)
+    return false
+  }
+}
+
 function rewampImgs2 () {
   let imgLinks = document.querySelectorAll('div#islsp div.isv-r > a')
 
   for (let imgLink of imgLinks) {
     if (imgLink.dataset['navigation'] !== undefined) continue
+    if (hasControls(imgLink.parentNode)) continue
 
     imgLink.addEventListener('click', function (evt) {
-      for (let child of evt.target.parentNode.parentNode.parentNode.childNodes) {
-        if (child.className === GOOGLE_PANIC_CLASS) return
+      console.log('in2')
+      if (!hasControls(evt.target.parentNode.parentNode.parentNode)) {
+        evt.stopPropagation()
+        evt.preventDefault()
+        readURLforImg(evt.target.parentNode.parentNode)
       }
-      evt.stopPropagation()
-      evt.preventDefault()
-      readURLforImg(evt.target.parentNode.parentNode)
     })
   }
 }
@@ -251,8 +284,38 @@ function rewampImgs3 () {
 
   for (let imgLink of imgLinks) {
     if (imgLink.dataset['navigation'] !== undefined) continue
-    imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
-    imgLink.addEventListener('click', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
+    else {
+      if (hasControls(imgLink.parentNode)) continue
+      imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
+      imgLink.addEventListener('click', function (evt) {
+        console.log('in3')
+        if (!hasControls(evt.target.parentNode.parentNode.parentNode)) {
+          evt.stopPropagation()
+          evt.preventDefault()
+          readURLforImg(evt.target.parentNode.parentNode)
+        }
+      })
+    }
+  }
+}
+
+function rewampImgs4 () {
+  let imgLinks = document.querySelectorAll('div#islsp  a[role="link"]')
+
+  for (let imgLink of imgLinks) {
+    if (imgLink.dataset['navigation'] !== undefined) continue
+    if (hasControls(imgLink.parentNode)) continue
+    else {
+      imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
+      imgLink.addEventListener('click', function (evt) {
+        console.log('in4')
+        if (!hasControls(evt.target.parentNode.parentNode)) {
+          evt.stopPropagation()
+          evt.preventDefault()
+          readURLforImg(evt.target.parentNode)
+        }
+      })
+    }
   }
 }
 
@@ -282,6 +345,13 @@ function waitForLoaded () {
 
     try {
       rewampImgs3()
+    } catch (err) {
+      console.log('[ERROR] in script, function rewampImgs3():')
+      console.log(err)
+    }
+
+    try {
+      rewampImgs4()
     } catch (err) {
       console.log('[ERROR] in script, function rewampImgs3():')
       console.log(err)
