@@ -1,13 +1,13 @@
 {
   "developer": {
-    "name": "JanRie",
+    "name": "Jan Riechers",
     "url": "https://github.com/jrie"
   },
-  "description": "Displays a 'view' link above images of Google image search",
+  "description": "Displays a 'view' link above images of Google image search and redirects to classic image search.",
   "homepage_url": "https://github.com/jrie/googlePanicImage",
   "manifest_version": 2,
   "name": "GooglePanicImages",
-  "version": "2.0.16",
+  "version": "2.0.17",
   "permissions": ["<all_urls>"],
   "content_scripts": [
 	{
