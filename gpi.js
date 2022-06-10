@@ -3,12 +3,29 @@
 // Timings and classname for panic button
 // ----------------------------------------------------------------------------------------
 
+if (navigator.userAgent.indexOf('Firefox') !== -1) {
+  const splittedAgent = navigator.userAgent.split('/')
+  const version = parseFloat(splittedAgent[splittedAgent.length - 1])
+  if (version >= 100) {
+    if (window.location.href.indexOf('&tbm=isch') !== -1 && window.location.href.indexOf('&gbv=2') === -1) {
+      if (window.confirm('GooglePanicImages: Load classic google image search webpage?')) {
+        const searchString = window.location.href.toString().split('&')
+        for (const query of searchString) {
+          if (query.startsWith('q=')) {
+            window.location.href = window.location.href.toString().split('?', 1)[0] + '?' + query + '&gbv=2&tbm=isch'
+          }
+        }
+      }
+    }
+  }
+}
+
 // Seconds, when the script should scan the search page for new images
-let SECONDS_TO_FIRE = 1.25
-let SECONDS_TO_FIRE_CUT = SECONDS_TO_FIRE * 0.35
+const SECONDS_TO_FIRE = 1.25
+const SECONDS_TO_FIRE_CUT = SECONDS_TO_FIRE * 0.35
 
 // Our panic class (buttons)
-let GOOGLE_PANIC_CLASS = 'Google-panic-image-btn-new'
+const GOOGLE_PANIC_CLASS = 'Google-panic-image-btn-new'
 
 // ----------------------------------------------------------------------------------------
 // Global variables
@@ -17,71 +34,70 @@ let fireAt = 0
 // ----------------------------------------------------------------------------------------
 
 // RegExParsers
-let imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-let imgRegExBase1 = /imgurl=(http[s]{0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-let imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-let imgRegExBaseNoImage = /imgurl=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
-let imgRegExBaseNoImage1 = /imgurl=\[,(http[s]{0,1}(%3a|:).[^"\&\?"]*)/i
-let imgRegExBaseNoImage2 = /\[,(http[s]{0,1}(%3a|:).[^\&\?]*)/i
-let imgRegExBaseNoImage3 = /=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
+const imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
+const imgRegExBase1 = /imgurl=(http[s]{0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
+const imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
+const imgRegExBaseNoImage = /imgurl=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
+const imgRegExBaseNoImage1 = /imgurl=\[,(http[s]{0,1}(%3a|:).[^"\&\?"]*)/i
+const imgRegExBaseNoImage2 = /\[,(http[s]{0,1}(%3a|:).[^\&\?]*)/i
+const imgRegExBaseNoImage3 = /=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 
-let imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-let imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-let imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&\?]*)/i
+const imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
+const imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
+const imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 
-let imgFacebook = /(http[s]{0,1}(%3a|:)\/\/lookaside\.fbsbx\.com\/lookaside\/crawler\/media\/.*)/i
+const imgFacebook = /(http[s]{0,1}(%3a|:)\/\/lookaside\.fbsbx\.com\/lookaside\/crawler\/media\/.*)/i
 
 // Gathers all images and adds a "VIEW" link to the direct picture url
 function rewampImgs () {
   try {
-    let imgLinks = document.querySelectorAll('div.isv-r')
+    const imgLinks = document.querySelectorAll('div.isv-r')
     let isFacebook = false
 
     let pageLoad = ''
     pageLoad = document.children[0].outerHTML.replace(/[\n\t\r]{1,}/g, '')
 
-    for (let img of imgLinks) {
-
+    for (const img of imgLinks) {
       if (hasControls(img)) continue
 
       isFacebook = false
-      let imageID = img.dataset['id']
+      const imageID = img.dataset.id
       try {
-        let imgData = pageLoad.match(new RegExp('[0-9]?,"' + imageID + '",.*\],'))[0].split('"', 6)
+        const imgData = pageLoad.match(new RegExp('[0-9]?,"' + imageID + '",.*\],'))[0].split('"', 6)
         imgData.splice(0, imgData.length - 3)
-        img.dataset['irul'] = imgData
+        img.dataset.irul = imgData
       } catch (err) {
         continue
       }
 
       let imgURL = imgRegExBase1.exec(img.children[0].href)
       if (imgURL === null) {
-        imgURL = imgFacebook.exec(img.dataset['irul']);
-        if (imgURL !== null) isFacebook = true;
+        imgURL = imgFacebook.exec(img.dataset.irul)
+        if (imgURL !== null) isFacebook = true
       }
 
       if (!isFacebook) {
-        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(img.dataset['irul'])
+        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(img.dataset.irul)
         if (imgURL === '' || imgURL === null) imgURL = imgRegExBase2.exec(img.children[0].href)
 
-        if (imgURL === null) imgURL = imgRegExBase2.exec(img.dataset['irul'])
+        if (imgURL === null) imgURL = imgRegExBase2.exec(img.dataset.irul)
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
-        if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(img.dataset['irul'])
+        if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(img.dataset.irul)
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
-        if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(img.dataset['irul'])
+        if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(img.dataset.irul)
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
         if (imgURL === null) {
-          if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(img.dataset['irul'])
+          if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(img.dataset.irul)
           if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
-          if (imgURL === null) imgURL = imgRegExBase.exec(img.dataset['irul'])
+          if (imgURL === null) imgURL = imgRegExBase.exec(img.dataset.irul)
           if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
           if (imgURL === null) {
-            imgURL = imgRegExBaseNoImage.exec(img.dataset['irul'])
+            imgURL = imgRegExBaseNoImage.exec(img.dataset.irul)
             if (imgURL === null) {
               img.style.border = '6px solid #000'
               continue
@@ -92,35 +108,35 @@ function rewampImgs () {
 
       imgURL = imgURL[1]
       try {
-        for (let entry of imgURL.match(/[\\]{1,}u[a-fA-F0-9]{0,4}/gi)) imgURL = imgURL.replace(entry, String.fromCharCode(parseInt(entry.replace(/\\u/gi, ''), 16)))
+        for (const entry of imgURL.match(/[\\]{1,}u[a-fA-F0-9]{0,4}/gi)) imgURL = imgURL.replace(entry, String.fromCharCode(parseInt(entry.replace(/\\u/gi, ''), 16)))
       } catch (err) {
         if (imgURL.indexOf(')') !== -1) {
-          let imgData = img.dataset['irul'].split('/')
+          const imgData = img.dataset.irul.split('/')
           imgURL = 'https://' + decodeURIComponent(imgData[imgData.length - 1])
         } else {
           imgURL = decodeURIComponent(imgURL)
         }
       }
 
-      let domButton = document.createElement('a')
+      const domButton = document.createElement('a')
       domButton.target = '_blank'
       domButton.href = imgURL
       domButton.role = 'button'
       domButton.className = GOOGLE_PANIC_CLASS
       domButton.appendChild(document.createTextNode('VIEW'))
-      domButton.style['visibility'] = 'hidden'
-      domButton.style['position'] = 'absolute'
-      domButton.style['top'] = '10%'
-      domButton.style['left'] = '0px'
-      domButton.style['background'] = 'rgba(0,0,0,0.6)'
-      domButton.style['color'] = '#fff'
+      domButton.style.visibility = 'hidden'
+      domButton.style.position = 'absolute'
+      domButton.style.top = '10%'
+      domButton.style.left = '0px'
+      domButton.style.background = 'rgba(0,0,0,0.6)'
+      domButton.style.color = '#fff'
       domButton.style['font-weight'] = 'bold'
-      domButton.style['padding'] = '0.5em 1.5em'
+      domButton.style.padding = '0.5em 1.5em'
       domButton.style['border-radius'] = '0px 12px 12px 0px'
       domButton.style['z-index'] = '1'
       domButton.style['font-size'] = '12px'
       domButton.style['text-decoration'] = 'none'
-      domButton.style['border'] = '1px solid #aaa'
+      domButton.style.border = '1px solid #aaa'
       domButton.style['border-left'] = 'none'
       img.appendChild(domButton)
 
@@ -133,11 +149,10 @@ function rewampImgs () {
       img.addEventListener('mouseleave', hideControls)
     }
 
-    for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
+    for (const btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
       btn.removeEventListener('click', openImgLink)
       btn.addEventListener('click', openImgLink)
     }
-
   } catch (err) {
     console.log(err)
   }
@@ -149,12 +164,11 @@ function openImgLink (evt) {
 }
 
 function readURLforImg (imgLink) {
-
   try {
     let imgSrc = null
 
-    imgLink.dataset['irul'] = imgLink.href
-    for (let child of imgLink.childNodes) {
+    imgLink.dataset.irul = imgLink.href
+    for (const child of imgLink.childNodes) {
       if (child.getAttribute('src') !== null) {
         imgSrc = child.getAttribute('src')
         break
@@ -168,28 +182,28 @@ function readURLforImg (imgLink) {
     } else {
       imgURL = imgRegExBase1.exec(imgLink.href)
       if (imgURL === null) {
-        imgURL = imgFacebook.exec(imgLink.dataset['irul']);
-        if (imgURL !== null) isFacebook = true;
+        imgURL = imgFacebook.exec(imgLink.dataset.irul)
+        if (imgURL !== null) isFacebook = true
       }
 
       if (!isFacebook) {
-        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(imgLink.dataset['irul'])
+        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(imgLink.dataset.irul)
         if (imgURL === '' || imgURL === null) imgURL = imgRegExBase2.exec(imgLink.parentNode.children[0].href)
 
-        if (imgURL === null) imgURL = imgRegExBase2.exec(imgLink.dataset['irul'])
+        if (imgURL === null) imgURL = imgRegExBase2.exec(imgLink.dataset.irul)
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
-        if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(imgLink.dataset['irul'])
+        if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(imgLink.dataset.irul)
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
-        if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(imgLink.dataset['irul'])
+        if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(imgLink.dataset.irul)
         if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
         if (imgURL === null) {
-          if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(imgLink.dataset['irul'])
+          if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(imgLink.dataset.irul)
           if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
 
-          if (imgURL === null) imgURL = imgRegExBase.exec(imgLink.dataset['irul'])
+          if (imgURL === null) imgURL = imgRegExBase.exec(imgLink.dataset.irul)
           if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
         }
       }
@@ -199,34 +213,34 @@ function readURLforImg (imgLink) {
     }
 
     if (imgURL.indexOf(')') !== -1) {
-      let imgData = imgLink.dataset['irul'].split('/')
+      const imgData = imgLink.dataset.irul.split('/')
       imgURL = 'https://' + decodeURIComponent(imgData[imgData.length - 1])
     } else imgURL = decodeURIComponent(imgURL)
 
-    let domButton = document.createElement('a')
+    const domButton = document.createElement('a')
     domButton.target = '_blank'
     domButton.href = imgURL
     domButton.role = 'button'
     domButton.className = GOOGLE_PANIC_CLASS
     domButton.appendChild(document.createTextNode('VIEW'))
-    domButton.style['visibility'] = 'hidden'
-    domButton.style['position'] = 'absolute'
-    domButton.style['top'] = '10%'
-    domButton.style['left'] = '0px'
-    domButton.style['background'] = 'rgba(0,0,0,0.6)'
-    domButton.style['color'] = '#fff'
+    domButton.style.visibility = 'hidden'
+    domButton.style.position = 'absolute'
+    domButton.style.top = '10%'
+    domButton.style.left = '0px'
+    domButton.style.background = 'rgba(0,0,0,0.6)'
+    domButton.style.color = '#fff'
     domButton.style['font-weight'] = 'bold'
-    if (imgSrc === null) domButton.style['padding'] = '0.65em 2em'
-    else domButton.style['padding'] = '1.25em 2em'
+    if (imgSrc === null) domButton.style.padding = '0.65em 2em'
+    else domButton.style.padding = '1.25em 2em'
     domButton.style['border-radius'] = '0px 12px 12px 0px'
     domButton.style['z-index'] = '1'
     domButton.style['font-size'] = '12px'
     domButton.style['text-decoration'] = 'none'
-    domButton.style['border'] = '1px solid #aaa'
+    domButton.style.border = '1px solid #aaa'
     domButton.style['border-left'] = 'none'
     imgLink.parentNode.appendChild(domButton)
 
-    for (let btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
+    for (const btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
       btn.removeEventListener('click', openImgLink)
       btn.addEventListener('click', openImgLink)
     }
@@ -239,16 +253,16 @@ function readURLforImg (imgLink) {
     imgLink.parentNode.addEventListener('mousemove', overlayControls)
     imgLink.parentNode.addEventListener('mouseleave', hideControls)
 
-    imgLink.parentNode.dispatchEvent(new MouseEvent('mouseenter', { 'target': imgLink.parentNode }))
+    imgLink.parentNode.dispatchEvent(new MouseEvent('mouseenter', { target: imgLink.parentNode }))
   } catch (err) {
     console.log(err)
   }
 }
 
-function hasControls(parentNode) {
+function hasControls (parentNode) {
   try {
-    let childNodeCount = parentNode.childNodes.length
-    let nodes = parentNode.childNodes;
+    const childNodeCount = parentNode.childNodes.length
+    const nodes = parentNode.childNodes
     for (let x = childNodeCount - 1; x >= 0; --x) {
       if (nodes[x].className === GOOGLE_PANIC_CLASS) {
         return true
@@ -262,10 +276,10 @@ function hasControls(parentNode) {
 }
 
 function rewampImgs2 () {
-  let imgLinks = document.querySelectorAll('div#islsp div.isv-r > a')
+  const imgLinks = document.querySelectorAll('div#islsp div.isv-r > a')
 
-  for (let imgLink of imgLinks) {
-    if (imgLink.dataset['navigation'] !== undefined) continue
+  for (const imgLink of imgLinks) {
+    if (imgLink.dataset.navigation !== undefined) continue
     if (hasControls(imgLink.parentNode)) continue
 
     imgLink.addEventListener('click', function (evt) {
@@ -279,10 +293,10 @@ function rewampImgs2 () {
 }
 
 function rewampImgs3 () {
-  let imgLinks = document.querySelectorAll('div#islrg div.isv-r > a')
+  const imgLinks = document.querySelectorAll('div#islrg div.isv-r > a')
 
-  for (let imgLink of imgLinks) {
-    if (imgLink.dataset['navigation'] !== undefined) continue
+  for (const imgLink of imgLinks) {
+    if (imgLink.dataset.navigation !== undefined) continue
     if (hasControls(imgLink.parentNode)) continue
     else {
       imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
@@ -298,10 +312,10 @@ function rewampImgs3 () {
 }
 
 function rewampImgs4 () {
-  let imgLinks = document.querySelectorAll('div#islsp  a[role="link"]')
+  const imgLinks = document.querySelectorAll('div#islsp  a[role="link"]')
 
-  for (let imgLink of imgLinks) {
-    if (imgLink.dataset['navigation'] !== undefined) continue
+  for (const imgLink of imgLinks) {
+    if (imgLink.dataset.navigation !== undefined) continue
     if (hasControls(imgLink.parentNode)) continue
     else {
       imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
@@ -355,8 +369,8 @@ function waitForLoaded () {
     }
 
     try {
-      let imgs = document.querySelectorAll('div#islsp div.isv-r')
-      for (let img of imgs) {
+      const imgs = document.querySelectorAll('div#islsp div.isv-r')
+      for (const img of imgs) {
         img.removeEventListener('click', resetFire)
         img.addEventListener('click', resetFire)
       }
@@ -373,8 +387,8 @@ function waitForLoaded () {
 // ----------------------------------------------------------------------------------------
 // Display the controls, when the mouse is hovered over the image
 function overlayControls (event) {
-  let img = event.target
-  for (let child of img.childNodes) {
+  const img = event.target
+  for (const child of img.childNodes) {
     if (child.className === GOOGLE_PANIC_CLASS) {
       child.style.visibility = 'visible'
       break
@@ -384,8 +398,8 @@ function overlayControls (event) {
 
 // Hide the controls, if the mouse is moved out of the image
 function hideControls (event) {
-  let img = event.target
-  for (let child of img.childNodes) {
+  const img = event.target
+  for (const child of img.childNodes) {
     if (child.className === GOOGLE_PANIC_CLASS) {
       child.style.visibility = 'hidden'
       break
