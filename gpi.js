@@ -6,7 +6,7 @@
 if (navigator.userAgent.indexOf('Firefox') !== -1) {
   const splittedAgent = navigator.userAgent.split('/')
   const version = parseFloat(splittedAgent[splittedAgent.length - 1])
-  if (version >= 100) {
+  if (version >= 103) {
     if (window.location.href.indexOf('&tbm=isch') !== -1 && window.location.href.indexOf('&gbv=2') === -1) {
       if (document.querySelector('div.isv-r') === null) {
         if (window.confirm('GooglePanicImages: Load classic google image search webpage?')) {
