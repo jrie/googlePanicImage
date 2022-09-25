@@ -1,8 +1,6 @@
 # googlePanicImage
 Displays direct "view" links on images at Google Image search
 
-![Screenshot @ google](https://www.picflash.org/viewer.php?img=d4rkrgsievbv9hu.png "Screenshot at Google image search")
-
 ## Summary
 Once GooglePanicImages is enabled, a 'View' button is displayed on top of images from Google Image search, when images are hovered over. Clicking on 'View' opens the source image directly in a new tab.
 
