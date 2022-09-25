@@ -46,10 +46,6 @@ const imgRegExBaseNoImage1 = /imgurl=\[,(http[s]{0,1}(%3a|:).[^"\&\?"]*)/i
 const imgRegExBaseNoImage2 = /\[,(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 const imgRegExBaseNoImage3 = /=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
 
-const imgRegExBaseImg = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-const imgRegExBaseImage2Img = /(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-const imgRegExBaseNoImageImg = /(http[s]{0,1}(%3a|:).[^\&\?]*)/i
-
 const imgFacebook = /(http[s]{0,1}(%3a|:)\/\/lookaside\.fbsbx\.com\/lookaside\/crawler\/media\/.*)/i
 
 // Gathers all images and adds a "VIEW" link to the direct picture url
@@ -257,7 +253,7 @@ function readURLforImg (imgLink) {
     imgLink.parentNode.addEventListener('mousemove', overlayControls)
     imgLink.parentNode.addEventListener('mouseleave', hideControls)
 
-    imgLink.parentNode.dispatchEvent(new MouseEvent('mouseenter', { target: imgLink.parentNode }))
+    imgLink.parentNode.dispatchEvent(new window.MouseEvent('mouseenter', { target: imgLink.parentNode }))
   } catch (err) {
     console.log(err)
   }
