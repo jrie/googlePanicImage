@@ -3,6 +3,11 @@
     "name": "Jan Riechers",
     "url": "https://github.com/jrie"
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{cef89dc3-7bbd-48c7-a43e-b1e8f9cffb9e}"
+    }
+  },
   "description": "Displays a 'view' link above images of Google image search and redirects to classic image search.",
   "homepage_url": "https://github.com/jrie/googlePanicImage",
   "manifest_version": 3,
