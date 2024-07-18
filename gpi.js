@@ -28,219 +28,218 @@ const gpiStyle = '.' + GOOGLE_PANIC_CLASS + ` {
         }`;
 
 // ----------------------------------------------------------------------------------------
-function addCSSStyle() {
-    const styleSheet = document.styleSheets[0];
-    styleSheet.insertRule(gpiStyle);
+function addCSSStyle () {
+  const styleSheet = document.styleSheets[0];
+  styleSheet.insertRule(gpiStyle);
 }
 
-function parseRegularImage(target) {
-    const img = target.querySelector('a[href^="/imgres"]');
-    if (!img.href) {
-        continue;
-    }
-    const imgRawURL = decodeURIComponent(img.href);
-    let imgTarget;
+function parseRegularImage (target) {
+  const img = target.querySelector('a[href^="/imgres"]');
+  if (!img.href) {
+    return;
+  }
+  const imgRawURL = decodeURIComponent(img.href);
+  let imgTarget;
 
-    if (imgRawURL) {
-        const imgURL = imgRegEx.exec(imgRawURL);
-        if (!imgURL) {
-            console.warn('imgURL not parsed correctly [parseRegularImage], URL:', imgRawURL.href);
-        } else {
-            imgTarget = imgURL[1];
-            return imgTarget;
-        }
+  if (imgRawURL) {
+    const imgURL = imgRegEx.exec(imgRawURL);
+    if (!imgURL) {
+      console.warn('imgURL not parsed correctly [parseRegularImage], URL:', imgRawURL.href);
     } else {
-        console.warn('imgRawURL not detected [parseRegularImage], URL:', img.href);
+      imgTarget = imgURL[1];
+      return imgTarget;
     }
+  } else {
+    console.warn('imgRawURL not detected [parseRegularImage], URL:', img.href);
+  }
 
-    return false;
+  return false;
 }
 
-function parseSubImage(target) {
-    if (target.href) {
-        const imgURL = imgRegEx.exec(decodeURIComponent(target.href));
-        if (imgURL) {
-            return imgURL[1];
-        }
-
+function parseSubImage (target) {
+  if (target.href) {
+    const imgURL = imgRegEx.exec(decodeURIComponent(target.href));
+    if (imgURL) {
+      return imgURL[1];
     }
-    return false;
+  }
+  return false;
 }
 
-function parseLargeImage(target) {
-    if (target.dataset.gpiURI) {
-        return decodeURIComponent(target.dataset.gpiURI);
-    }
+function parseLargeImage (target) {
+  if (target.dataset.gpiURI) {
+    return decodeURIComponent(target.dataset.gpiURI);
+  }
 
-    console.warn('imgRawURL not detected [parseLargeImage], URL:', target);
-    return false;
+  console.warn('imgRawURL not detected [parseLargeImage], URL:', target);
+  return false;
 }
 
-function deactivateHover(evt) {
-    const overlay = evt.target.querySelector(overlayClassSelector);
-    if (overlay) {
-        overlay.style.visibility = 'hidden';
-    }
+function deactivateHover (evt) {
+  const overlay = evt.target.querySelector(overlayClassSelector);
+  if (overlay) {
+    overlay.style.visibility = 'hidden';
+  }
 }
 
-function activateHover(evt) {
-    const overlay = evt.target.querySelector(overlayClassSelector);
-    if (overlay) {
-        overlay.style.visibility = 'visible';
-        return;
-    }
+function activateHover (evt) {
+  const overlay = evt.target.querySelector(overlayClassSelector);
+  if (overlay) {
+    overlay.style.visibility = 'visible';
+    return;
+  }
 
-    let imgTarget;
+  let imgTarget;
+
+  switch (evt.target.dataset.gpi) {
+    case 's':
+      imgTarget = parseRegularImage(evt.target);
+      break;
+    case 'l':
+      imgTarget = parseLargeImage(evt.target);
+      break;
+    case 'sl':
+      imgTarget = parseSubImage(evt.target);
+      break;
+    default:
+      console.warn('dataset \'gpi\' missing [activateHover]');
+      break;
+  }
+
+  if (imgTarget) {
+    const domButton = document.createElement('a');
+    domButton.target = '_blank';
+    domButton.href = imgTarget;
+    domButton.role = 'button';
+    domButton.className = GOOGLE_PANIC_CLASS;
+    domButton.appendChild(document.createTextNode('VIEW'));
 
     switch (evt.target.dataset.gpi) {
-        case 's':
-            imgTarget = parseRegularImage(evt.target);
-            break;
-        case 'l':
-            imgTarget = parseLargeImage(evt.target);
-            break;
-        case 'sl':
-            imgTarget = parseSubImage(evt.target);
-            break;
-        default:
-            console.warn('dataset \'gpi\' missing [activateHover]');
-            break;
+      case 's':
+        evt.target.appendChild(domButton);
+        domButton.addEventListener('click', openImage);
+        break;
+      case 'l':
+      case 'sl':
+        evt.target.appendChild(domButton);
+        break;
+    }
+  }
+}
+
+function openImage (evt) {
+  window.open(evt.target.href, '_blank');
+}
+
+function deactivateLarge (evt) {
+  hasLargeImage = false;
+}
+
+function addHandler (target) {
+  switch (target.dataset.gpi) {
+    case 'b':
+      target.addEventListener('mouseenter', deactivateLarge);
+      break;
+    case 's':
+      target.addEventListener('mouseenter', activateHover);
+      target.addEventListener('mousemove', activateHover);
+      target.addEventListener('mouseleave', deactivateHover);
+      target.addEventListener('click', deactivateLarge);
+      break;
+    case 'l':
+      target.addEventListener('mouseenter', activateHover);
+      target.addEventListener('mousemove', activateHover);
+      target.addEventListener('mouseleave', deactivateHover);
+    case 'sl':
+      target.addEventListener('mouseenter', activateHover);
+      target.addEventListener('mousemove', activateHover);
+      target.addEventListener('mouseleave', deactivateHover);
+      target.addEventListener('click', deactivateLarge);
+      break;
+  }
+}
+
+function parseImages () {
+  // Regular view
+  const regularImages = document.querySelectorAll('div[data-attrid^="images"]');
+  for (const img of regularImages) {
+    if (img.dataset.gpi) {
+      continue;
     }
 
-    if (imgTarget) {
-        const domButton = document.createElement('a');
-        domButton.target = '_blank';
-        domButton.href = imgTarget;
-        domButton.role = 'button';
-        domButton.className = GOOGLE_PANIC_CLASS;
-        domButton.appendChild(document.createTextNode('VIEW'));
+    img.dataset.gpi = 's';
+    addHandler(img);
+  }
+}
 
-        switch (evt.target.dataset.gpi) {
-            case 's':
-                evt.target.appendChild(domButton);
-                domButton.addEventListener('click', openImage);
-                break;
-            case 'l':
-            case 'sl':
-                evt.target.appendChild(domButton);
-                break;
-        }
+function parseGallerySubImages () {
+  // Gallery subimages view
+  const gallerySubImages = document.querySelectorAll('a[data-nav="1"]');
+  for (const img of gallerySubImages) {
+    if (img.dataset.gpi) {
+      continue;
     }
-}
 
-function openImage(evt) {
-    window.open(evt.target.href, '_blank');
-}
-
-function deactivateLarge(evt) {
-    hasLargeImage = false;
-}
-
-function addHandler(target) {
-    switch (target.dataset.gpi) {
-        case 'b':
-            target.addEventListener('mouseenter', deactivateLarge);
-            break;
-        case 's':
-            target.addEventListener('mouseenter', activateHover);
-            target.addEventListener('mousemove', activateHover);
-            target.addEventListener('mouseleave', deactivateHover);
-            target.addEventListener('click', deactivateLarge);
-            break;
-        case 'l':
-            target.addEventListener('mouseenter', activateHover);
-            target.addEventListener('mousemove', activateHover);
-            target.addEventListener('mouseleave', deactivateHover);
-        case 'sl':
-            target.addEventListener('mouseenter', activateHover);
-            target.addEventListener('mousemove', activateHover);
-            target.addEventListener('mouseleave', deactivateHover);
-            target.addEventListener('click', deactivateLarge);
-            break;
+    if (img.src) {
+      continue;
     }
-}
 
-function parseImages() {
-    // Regular view
-    const regularImages = document.querySelectorAll('div[data-attrid^="images"]');
-    for (const img of regularImages) {
-        if (img.dataset.gpi) {
-            continue;
-        }
+    if (!img.href) {
+      img.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true,
+        button: 2
+      }));
 
-        img.dataset.gpi = 's';
-        addHandler(img);
+      continue;
     }
+
+    img.dataset.gpi = 'sl';
+    img.dataset.gpiURI = img.href;
+    addHandler(img);
+  }
 }
 
-function parseGallerySubImages() {
-    // Gallery subimages view
-    const gallerySubImages = document.querySelectorAll('a[data-nav="1"]');
-    for (const img of gallerySubImages) {
-        if (img.dataset.gpi) {
-            continue;
-        }
+function parseLarge (target) {
+  // Detail gallery view
+  target.parentNode.dataset.gpi = 'l';
+  target.parentNode.dataset.gpiURI = target.src;
+  addHandler(target.parentNode);
+  hasLargeImage = true;
+}
 
-        if (img.src) {
-            continue;
-        }
-
-        if (!img.href) {
-            img.dispatchEvent(new MouseEvent("mousedown", {
-                bubbles: true,
-                button: 2
-            }));
-
-            continue;
-        }
-
-        img.dataset.gpi = 'sl';
-        img.dataset.gpiURI = img.href;
-        addHandler(img);
+function parseControls () {
+  const controls = document.querySelectorAll('button[aria-disabled="false"]');
+  for (const control of controls) {
+    if (!control.dataset.gpi) {
+      control.dataset.gpi = 'b';
+      addHandler(control);
     }
+  }
 }
 
-function parseLarge(target) {
-    // Detail gallery view
-    target.parentNode.dataset.gpi = 'l';
-    target.parentNode.dataset.gpiURI = target.src;
-    addHandler(target.parentNode);
-    hasLargeImage = true;
-}
+function mutationCallback (mutations, observer) {
+  if (hasLargeImage) {
+    window.requestAnimationFrame(parseGallerySubImages);
+    return;
+  }
 
-function parseControls() {
-    const controls = document.querySelectorAll('button[aria-disabled="false"]');
-    for (const control of controls) {
-        if (!control.dataset.gpi) {
-            control.dataset.gpi = 'b';
-            addHandler(control);
-        }
-    }
-}
-
-function mutationCallback(mutations, observer) {
-    if (hasLargeImage) {
-        window.requestAnimationFrame(parseGallerySubImages);
+  for (const mutation of mutations) {
+    if (mutation.target.nodeName === 'IMG') {
+      if (mutation.target.src) {
+        parseLarge(mutation.target);
+        parseControls();
         return;
+      }
     }
-
-    for (const mutation of mutations) {
-        if (mutation.target.nodeName === 'IMG') {
-            if (mutation.target.src) {
-                parseLarge(mutation.target);
-                parseControls();
-                return;
-            }
-        }
-    }
+  }
 }
 
 // ----------------------------------------------------------------------------------------
 const observer = new MutationObserver(mutationCallback);
 const observerConfig = {
-    attributes: true,
-    attributeFilter: ['style'],
-    subtree: true
+  attributes: true,
+  attributeFilter: ['style'],
+  subtree: true
 };
 
 window.addEventListener('scrollend', parseImages);
