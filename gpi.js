@@ -35,9 +35,10 @@ function addCSSStyle () {
 
 function parseRegularImage (target) {
   const img = target.querySelector('a[href^="/imgres"]');
-  if (!img.href) {
-    return;
+  if (!img || !img.href) {
+    return false;
   }
+
   const imgRawURL = decodeURIComponent(img.href);
   let imgTarget;
 
@@ -150,6 +151,7 @@ function addHandler (target) {
       target.addEventListener('mouseenter', activateHover);
       target.addEventListener('mousemove', activateHover);
       target.addEventListener('mouseleave', deactivateHover);
+      break;
     case 'sl':
       target.addEventListener('mouseenter', activateHover);
       target.addEventListener('mousemove', activateHover);
