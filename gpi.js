@@ -1,411 +1,250 @@
+// ----------------------------------------------------------------------------------------
+// Google panic image v3 @ 18.06.2024
+// ----------------------------------------------------------------------------------------
+// Classname for panic button
+// ----------------------------------------------------------------------------------------
+const GOOGLE_PANIC_CLASS = 'Google-panic-image-btn';
+const overlayClassSelector = 'a.' + GOOGLE_PANIC_CLASS;
+const imgRegEx = /.*imgurl=(.[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i;
+let hasLargeImage = false;
+
+const gpiStyle = '.' + GOOGLE_PANIC_CLASS + ` {
+        visibility: 'hidden';
+        position: absolute;
+        top: 10%;
+        left: 0px;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        font-weight: bold;
+        height: 1em;
+        padding: 0.5em 1.5em;
+        border-radius: 0px 12px 12px 0px;
+        z-index: 1;
+        line-height: 1em;
+        font-size: 0.75rem;
+        text-decoration: none;
+        border 1px solid #aaa;
+        border-left: none;
+        }`;
 
 // ----------------------------------------------------------------------------------------
-// Timings and classname for panic button
-// ----------------------------------------------------------------------------------------
-
-if (navigator.userAgent.indexOf('Firefox') !== -1) {
-  const splittedAgent = navigator.userAgent.split('/')
-  const version = parseFloat(splittedAgent[splittedAgent.length - 1])
-  if (version >= 103) {
-    if (window.location.href.indexOf('&tbm=isch') !== -1 && window.location.href.indexOf('&gbv=2') === -1) {
-      if (document.querySelector('div.isv-r') === null) {
-        if (window.confirm('GooglePanicImages: Load classic google image search webpage?')) {
-          const searchString = window.location.href.toString().split('&')
-
-          for (const query of searchString) {
-            if (query.startsWith('q=')) {
-              console.log(window.location.href.toString().split('?', 1)[0] + '?' + query + '&gbv=2&tbm=isch&')
-              window.location.href = window.location.href.toString().split('?', 1)[0] + '?' + query + '&gbv=2&tbm=isch'
-            }
-          }
-        }
-      }
-    }
-  }
+function addCSSStyle() {
+    const styleSheet = document.styleSheets[0];
+    styleSheet.insertRule(gpiStyle);
 }
 
-// Seconds, when the script should scan the search page for new images
-const SECONDS_TO_FIRE = 1.25
-const SECONDS_TO_FIRE_CUT = SECONDS_TO_FIRE * 0.35
+function parseRegularImage(target) {
+    const img = target.querySelector('a[href^="/imgres"]');
+    if (!img.href) {
+        continue;
+    }
+    const imgRawURL = decodeURIComponent(img.href);
+    let imgTarget;
 
-// Our panic class (buttons)
-const GOOGLE_PANIC_CLASS = 'Google-panic-image-btn-new'
-
-// ----------------------------------------------------------------------------------------
-// Global variables
-// ----------------------------------------------------------------------------------------
-let fireAt = 0
-// ----------------------------------------------------------------------------------------
-
-// RegExParsers
-const imgRegExBase = /\[,(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-const imgRegExBase1 = /imgurl=(http[s]{0,1}(%3a|:).*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-const imgRegExBase2 = /=(http[s]{0,1}(%3a|:).[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i
-const imgRegExBaseNoImage = /imgurl=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
-const imgRegExBaseNoImage1 = /imgurl=\[,(http[s]{0,1}(%3a|:).[^"\&\?"]*)/i
-const imgRegExBaseNoImage2 = /\[,(http[s]{0,1}(%3a|:).[^\&\?]*)/i
-const imgRegExBaseNoImage3 = /=(http[s]{0,1}(%3a|:).[^\&\?]*)/i
-
-const imgFacebook = /(http[s]{0,1}(%3a|:)\/\/lookaside\.fbsbx\.com\/lookaside\/crawler\/media\/.*)/i
-
-// Gathers all images and adds a "VIEW" link to the direct picture url
-function rewampImgs () {
-  try {
-    const imgLinks = document.querySelectorAll('div.isv-r')
-    let isFacebook = false
-
-    let pageLoad = ''
-    pageLoad = document.children[0].outerHTML.replace(/[\n\t\r]{1,}/g, '')
-
-    for (const img of imgLinks) {
-      if (hasControls(img)) continue
-
-      isFacebook = false
-      const imageID = img.dataset.id
-      try {
-        const imgData = pageLoad.match(new RegExp('[0-9]?,"' + imageID + '",.*\],'))[0].split('"', 6)
-        imgData.splice(0, imgData.length - 3)
-        img.dataset.irul = imgData
-      } catch (err) {
-        continue
-      }
-
-      let imgURL = imgRegExBase1.exec(img.children[0].href)
-      if (imgURL === null) {
-        imgURL = imgFacebook.exec(img.dataset.irul)
-        if (imgURL !== null) isFacebook = true
-      }
-
-      if (!isFacebook) {
-        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(img.dataset.irul)
-        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase2.exec(img.children[0].href)
-
-        if (imgURL === null) imgURL = imgRegExBase2.exec(img.dataset.irul)
-        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-        if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(img.dataset.irul)
-        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-        if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(img.dataset.irul)
-        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-        if (imgURL === null) {
-          if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(img.dataset.irul)
-          if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-          if (imgURL === null) imgURL = imgRegExBase.exec(img.dataset.irul)
-          if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-          if (imgURL === null) {
-            imgURL = imgRegExBaseNoImage.exec(img.dataset.irul)
-            if (imgURL === null) {
-              img.style.border = '6px solid #000'
-              continue
-            }
-          }
-        }
-      }
-
-      imgURL = imgURL[1]
-      try {
-        for (const entry of imgURL.match(/[\\]{1,}u[a-fA-F0-9]{0,4}/gi)) imgURL = imgURL.replace(entry, String.fromCharCode(parseInt(entry.replace(/\\u/gi, ''), 16)))
-      } catch (err) {
-        if (imgURL.indexOf(')') !== -1) {
-          const imgData = img.dataset.irul.split('/')
-          imgURL = 'https://' + decodeURIComponent(imgData[imgData.length - 1])
+    if (imgRawURL) {
+        const imgURL = imgRegEx.exec(imgRawURL);
+        if (!imgURL) {
+            console.warn('imgURL not parsed correctly [parseRegularImage], URL:', imgRawURL.href);
         } else {
-          imgURL = decodeURIComponent(imgURL)
+            imgTarget = imgURL[1];
+            return imgTarget;
         }
-      }
-
-      const domButton = document.createElement('a')
-      domButton.target = '_blank'
-      domButton.href = imgURL
-      domButton.role = 'button'
-      domButton.className = GOOGLE_PANIC_CLASS
-      domButton.appendChild(document.createTextNode('VIEW'))
-      domButton.style.visibility = 'hidden'
-      domButton.style.position = 'absolute'
-      domButton.style.top = '10%'
-      domButton.style.left = '0px'
-      domButton.style.background = 'rgba(0,0,0,0.6)'
-      domButton.style.color = '#fff'
-      domButton.style['font-weight'] = 'bold'
-      domButton.style.padding = '0.5em 1.5em'
-      domButton.style['border-radius'] = '0px 12px 12px 0px'
-      domButton.style['z-index'] = '1'
-      domButton.style['font-size'] = '12px'
-      domButton.style['text-decoration'] = 'none'
-      domButton.style.border = '1px solid #aaa'
-      domButton.style['border-left'] = 'none'
-      img.appendChild(domButton)
-
-      img.removeEventListener('mouseenter', overlayControls)
-      img.removeEventListener('mousemove', overlayControls)
-      img.removeEventListener('mouseleave', hideControls)
-
-      img.addEventListener('mouseenter', overlayControls)
-      img.addEventListener('mousemove', overlayControls)
-      img.addEventListener('mouseleave', hideControls)
-    }
-
-    for (const btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
-      btn.removeEventListener('click', openImgLink)
-      btn.addEventListener('click', openImgLink)
-    }
-  } catch (err) {
-    console.log(err)
-  }
-}
-
-function openImgLink (evt) {
-  evt.preventDefault()
-  window.open(evt.target.href, '_blank')
-}
-
-function readURLforImg (imgLink) {
-  try {
-    let imgSrc = null
-
-    imgLink.dataset.irul = imgLink.href
-    for (const child of imgLink.childNodes) {
-      if (child.getAttribute('src') !== null) {
-        imgSrc = child.getAttribute('src')
-        break
-      }
-    }
-
-    let isFacebook = false
-    let imgURL = null
-    if (imgSrc !== null) {
-      imgURL = imgSrc
     } else {
-      imgURL = imgRegExBase1.exec(imgLink.href)
-      if (imgURL === null) {
-        imgURL = imgFacebook.exec(imgLink.dataset.irul)
-        if (imgURL !== null) isFacebook = true
-      }
+        console.warn('imgRawURL not detected [parseRegularImage], URL:', img.href);
+    }
 
-      if (!isFacebook) {
-        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase1.exec(imgLink.dataset.irul)
-        if (imgURL === '' || imgURL === null) imgURL = imgRegExBase2.exec(imgLink.parentNode.children[0].href)
+    return false;
+}
 
-        if (imgURL === null) imgURL = imgRegExBase2.exec(imgLink.dataset.irul)
-        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-        if (imgURL === null) imgURL = imgRegExBaseNoImage3.exec(imgLink.dataset.irul)
-        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-        if (imgURL === null) imgURL = imgRegExBaseNoImage2.exec(imgLink.dataset.irul)
-        if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-        if (imgURL === null) {
-          if (imgURL === null) imgURL = imgRegExBaseNoImage1.exec(imgLink.dataset.irul)
-          if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
-
-          if (imgURL === null) imgURL = imgRegExBase.exec(imgLink.dataset.irul)
-          if (imgURL !== null && imgURL[1].startsWith('https://encrypted-tbn0.gstatic.com/images')) imgURL = null
+function parseSubImage(target) {
+    if (target.href) {
+        const imgURL = imgRegEx.exec(decodeURIComponent(target.href));
+        if (imgURL) {
+            return imgURL[1];
         }
-      }
-      if (imgURL === null) return
 
-      imgURL = imgURL[1]
     }
-
-    if (imgURL.indexOf(')') !== -1) {
-      const imgData = imgLink.dataset.irul.split('/')
-      imgURL = 'https://' + decodeURIComponent(imgData[imgData.length - 1])
-    } else imgURL = decodeURIComponent(imgURL)
-
-    const domButton = document.createElement('a')
-    domButton.target = '_blank'
-    domButton.href = imgURL
-    domButton.role = 'button'
-    domButton.className = GOOGLE_PANIC_CLASS
-    domButton.appendChild(document.createTextNode('VIEW'))
-    domButton.style.visibility = 'hidden'
-    domButton.style.position = 'absolute'
-    domButton.style.top = '10%'
-    domButton.style.left = '0px'
-    domButton.style.background = 'rgba(0,0,0,0.6)'
-    domButton.style.color = '#fff'
-    domButton.style['font-weight'] = 'bold'
-    if (imgSrc === null) domButton.style.padding = '0.65em 2em'
-    else domButton.style.padding = '1.25em 2em'
-    domButton.style['border-radius'] = '0px 12px 12px 0px'
-    domButton.style['z-index'] = '1'
-    domButton.style['font-size'] = '12px'
-    domButton.style['text-decoration'] = 'none'
-    domButton.style.border = '1px solid #aaa'
-    domButton.style['border-left'] = 'none'
-    imgLink.parentNode.appendChild(domButton)
-
-    for (const btn of document.querySelectorAll('a.' + GOOGLE_PANIC_CLASS)) {
-      btn.removeEventListener('click', openImgLink)
-      btn.addEventListener('click', openImgLink)
-    }
-
-    imgLink.parentNode.removeEventListener('mouseenter', overlayControls)
-    imgLink.parentNode.removeEventListener('mousemove', overlayControls)
-    imgLink.parentNode.removeEventListener('mouseleave', hideControls)
-
-    imgLink.parentNode.addEventListener('mouseenter', overlayControls)
-    imgLink.parentNode.addEventListener('mousemove', overlayControls)
-    imgLink.parentNode.addEventListener('mouseleave', hideControls)
-
-    imgLink.parentNode.dispatchEvent(new window.MouseEvent('mouseenter', { target: imgLink.parentNode }))
-  } catch (err) {
-    console.log(err)
-  }
+    return false;
 }
 
-function hasControls (parentNode) {
-  try {
-    const childNodeCount = parentNode.childNodes.length
-    const nodes = parentNode.childNodes
-    for (let x = childNodeCount - 1; x >= 0; --x) {
-      if (nodes[x].className === GOOGLE_PANIC_CLASS) {
-        return true
-      }
+function parseLargeImage(target) {
+    if (target.dataset.gpiURI) {
+        return decodeURIComponent(target.dataset.gpiURI);
     }
-    return false
-  } catch (err) {
-    console.log(err)
-    return false
-  }
+
+    console.warn('imgRawURL not detected [parseLargeImage], URL:', target);
+    return false;
 }
 
-function rewampImgs2 () {
-  const imgLinks = document.querySelectorAll('div#islsp div.isv-r > a')
-
-  for (const imgLink of imgLinks) {
-    if (imgLink.dataset.navigation !== undefined) continue
-    if (hasControls(imgLink.parentNode)) continue
-
-    imgLink.addEventListener('click', function (evt) {
-      if (!hasControls(evt.target.parentNode.parentNode.parentNode)) {
-        evt.stopPropagation()
-        evt.preventDefault()
-        readURLforImg(evt.target.parentNode.parentNode)
-      }
-    })
-  }
+function deactivateHover(evt) {
+    const overlay = evt.target.querySelector(overlayClassSelector);
+    if (overlay) {
+        overlay.style.visibility = 'hidden';
+    }
 }
 
-function rewampImgs3 () {
-  const imgLinks = document.querySelectorAll('div#islrg div.isv-r > a')
+function activateHover(evt) {
+    const overlay = evt.target.querySelector(overlayClassSelector);
+    if (overlay) {
+        overlay.style.visibility = 'visible';
+        return;
+    }
 
-  for (const imgLink of imgLinks) {
-    if (imgLink.dataset.navigation !== undefined) continue
-    if (hasControls(imgLink.parentNode)) continue
-    else {
-      imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
-      imgLink.addEventListener('click', function (evt) {
-        if (!hasControls(evt.target.parentNode.parentNode.parentNode)) {
-          evt.stopPropagation()
-          evt.preventDefault()
-          readURLforImg(evt.target.parentNode.parentNode)
+    let imgTarget;
+
+    switch (evt.target.dataset.gpi) {
+        case 's':
+            imgTarget = parseRegularImage(evt.target);
+            break;
+        case 'l':
+            imgTarget = parseLargeImage(evt.target);
+            break;
+        case 'sl':
+            imgTarget = parseSubImage(evt.target);
+            break;
+        default:
+            console.warn('dataset \'gpi\' missing [activateHover]');
+            break;
+    }
+
+    if (imgTarget) {
+        const domButton = document.createElement('a');
+        domButton.target = '_blank';
+        domButton.href = imgTarget;
+        domButton.role = 'button';
+        domButton.className = GOOGLE_PANIC_CLASS;
+        domButton.appendChild(document.createTextNode('VIEW'));
+
+        switch (evt.target.dataset.gpi) {
+            case 's':
+                evt.target.appendChild(domButton);
+                domButton.addEventListener('click', openImage);
+                break;
+            case 'l':
+            case 'sl':
+                evt.target.appendChild(domButton);
+                break;
         }
-      })
     }
-  }
 }
 
-function rewampImgs4 () {
-  const imgLinks = document.querySelectorAll('div#islsp  a[role="link"]')
+function openImage(evt) {
+    window.open(evt.target.href, '_blank');
+}
 
-  for (const imgLink of imgLinks) {
-    if (imgLink.dataset.navigation !== undefined) continue
-    if (hasControls(imgLink.parentNode)) continue
-    else {
-      imgLink.addEventListener('mouseenter', function (evt) { readURLforImg(evt.target.parentNode.parentNode) })
-      imgLink.addEventListener('click', function (evt) {
-        if (!hasControls(evt.target.parentNode.parentNode)) {
-          evt.stopPropagation()
-          evt.preventDefault()
-          readURLforImg(evt.target.parentNode)
+function deactivateLarge(evt) {
+    hasLargeImage = false;
+}
+
+function addHandler(target) {
+    switch (target.dataset.gpi) {
+        case 'b':
+            target.addEventListener('mouseenter', deactivateLarge);
+            break;
+        case 's':
+            target.addEventListener('mouseenter', activateHover);
+            target.addEventListener('mousemove', activateHover);
+            target.addEventListener('mouseleave', deactivateHover);
+            target.addEventListener('click', deactivateLarge);
+            break;
+        case 'l':
+            target.addEventListener('mouseenter', activateHover);
+            target.addEventListener('mousemove', activateHover);
+            target.addEventListener('mouseleave', deactivateHover);
+        case 'sl':
+            target.addEventListener('mouseenter', activateHover);
+            target.addEventListener('mousemove', activateHover);
+            target.addEventListener('mouseleave', deactivateHover);
+            target.addEventListener('click', deactivateLarge);
+            break;
+    }
+}
+
+function parseImages() {
+    // Regular view
+    const regularImages = document.querySelectorAll('div[data-attrid^="images"]');
+    for (const img of regularImages) {
+        if (img.dataset.gpi) {
+            continue;
         }
-      })
+
+        img.dataset.gpi = 's';
+        addHandler(img);
     }
-  }
+}
+
+function parseGallerySubImages() {
+    // Gallery subimages view
+    const gallerySubImages = document.querySelectorAll('a[data-nav="1"]');
+    for (const img of gallerySubImages) {
+        if (img.dataset.gpi) {
+            continue;
+        }
+
+        if (img.src) {
+            continue;
+        }
+
+        if (!img.href) {
+            img.dispatchEvent(new MouseEvent("mousedown", {
+                bubbles: true,
+                button: 2
+            }));
+
+            continue;
+        }
+
+        img.dataset.gpi = 'sl';
+        img.dataset.gpiURI = img.href;
+        addHandler(img);
+    }
+}
+
+function parseLarge(target) {
+    // Detail gallery view
+    target.parentNode.dataset.gpi = 'l';
+    target.parentNode.dataset.gpiURI = target.src;
+    addHandler(target.parentNode);
+    hasLargeImage = true;
+}
+
+function parseControls() {
+    const controls = document.querySelectorAll('button[aria-disabled="false"]');
+    for (const control of controls) {
+        if (!control.dataset.gpi) {
+            control.dataset.gpi = 'b';
+            addHandler(control);
+        }
+    }
+}
+
+function mutationCallback(mutations, observer) {
+    if (hasLargeImage) {
+        window.requestAnimationFrame(parseGallerySubImages);
+        return;
+    }
+
+    for (const mutation of mutations) {
+        if (mutation.target.nodeName === 'IMG') {
+            if (mutation.target.src) {
+                parseLarge(mutation.target);
+                parseControls();
+                return;
+            }
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------------------
-// Reschedule a parsing
-function resetFire () {
-  fireAt = Date.now() + (SECONDS_TO_FIRE_CUT * 1000)
-}
+const observer = new MutationObserver(mutationCallback);
+const observerConfig = {
+    attributes: true,
+    attributeFilter: ['style'],
+    subtree: true
+};
 
-// ----------------------------------------------------------------------------------------
-// Function which does schedule the processing
-function waitForLoaded () {
-  if (Date.now() > fireAt) {
-    try {
-      rewampImgs()
-    } catch (err) {
-      console.log('[ERROR] in script, function rewampImgs():')
-      console.log(err)
-    }
-
-    try {
-      rewampImgs2()
-    } catch (err) {
-      console.log('[ERROR] in script, function rewampImgs2():')
-      console.log(err)
-    }
-
-    try {
-      rewampImgs3()
-    } catch (err) {
-      console.log('[ERROR] in script, function rewampImgs3():')
-      console.log(err)
-    }
-
-    try {
-      rewampImgs4()
-    } catch (err) {
-      console.log('[ERROR] in script, function rewampImgs3():')
-      console.log(err)
-    }
-
-    try {
-      const imgs = document.querySelectorAll('div#islsp div.isv-r')
-      for (const img of imgs) {
-        img.removeEventListener('click', resetFire)
-        img.addEventListener('click', resetFire)
-      }
-    } catch (err) {
-      console.log(err)
-    }
-
-    fireAt = Date.now() + (SECONDS_TO_FIRE * 1000)
-  }
-
-  window.requestAnimationFrame(waitForLoaded)
-}
-
-// ----------------------------------------------------------------------------------------
-// Display the controls, when the mouse is hovered over the image
-function overlayControls (event) {
-  const img = event.target
-  for (const child of img.childNodes) {
-    if (child.className === GOOGLE_PANIC_CLASS) {
-      child.style.visibility = 'visible'
-      break
-    }
-  }
-}
-
-// Hide the controls, if the mouse is moved out of the image
-function hideControls (event) {
-  const img = event.target
-  for (const child of img.childNodes) {
-    if (child.className === GOOGLE_PANIC_CLASS) {
-      child.style.visibility = 'hidden'
-      break
-    }
-  }
-}
-
-// ----------------------------------------------------------------------------------------
-window.requestAnimationFrame(waitForLoaded)
+window.addEventListener('scrollend', parseImages);
+window.requestAnimationFrame(addCSSStyle);
+window.requestAnimationFrame(parseImages);
+window.requestAnimationFrame(parseGallerySubImages);
+observer.observe(document.body, observerConfig);
