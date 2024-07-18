@@ -1,17 +1,16 @@
 {
-  "description": "Displays a 'view' link above images from Google image search",
-  "homepage_url": "https://github.com/jrie/googlePanicImage",
-  "manifest_version": 3,
-  "name": "GooglePanicImages",
-  "version": "2.1.21",
-  "host_permissions": [
-    "<all_urls>"
-  ],
-  "content_scripts": [
-	{
-		"matches": ["*://*/search*"],
-		"include_globs": ["*.google.*"],
-		"js": ["gpi.js"],
-		"all_frames": true
-	}]
+    "description": "Displays a 'view' link above images from Google image search",
+    "homepage_url": "https://github.com/jrie/googlePanicImage",
+    "manifest_version": 3,
+    "name": "GooglePanicImages",
+    "version": "3.0.0",
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "content_scripts": [{
+        "matches": ["*://*/search*"],
+        "include_globs": ["*.google.*"],
+        "js": ["gpi.js"],
+        "all_frames": true
+    }]
 }
