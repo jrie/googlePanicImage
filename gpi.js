@@ -40,14 +40,13 @@ function parseRegularImage (target) {
   }
 
   const imgRawURL = decodeURIComponent(img.href);
-  let imgTarget;
 
   if (imgRawURL) {
     const imgURL = imgRegEx.exec(imgRawURL);
     if (!imgURL) {
       console.warn('imgURL not parsed correctly [parseRegularImage], URL:', imgRawURL.href);
     } else {
-      imgTarget = imgURL[1];
+      const imgTarget = imgURL[1];
       return imgTarget;
     }
   } else {
@@ -226,12 +225,14 @@ function mutationCallback (mutations, observer) {
   }
 
   for (const mutation of mutations) {
-    if (mutation.target.nodeName === 'IMG') {
-      if (mutation.target.src) {
-        parseLarge(mutation.target);
-        parseControls();
-        return;
+    if (mutation.target.nodeName === 'IMG' && mutation.target.src) {
+      if (mutation.target.src.startsWith('https://encrypted-tb')) {
+        continue;
       }
+
+      parseLarge(mutation.target);
+      parseControls();
+      return;
     }
   }
 }
