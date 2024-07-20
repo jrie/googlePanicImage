@@ -163,7 +163,7 @@ function activateHover (evt) {
       case 'l':
         imageDimensions = evt.target.innerHTML.match(imgSizeRegExLarge);
         if (imageDimensions) {
-          const splitDimensions = imageDimensions[0].replace('.', '').split(' ', 3);
+          const splitDimensions = imageDimensions[0].replace(/\./g, '').split(' ', 3);
           console.log(splitDimensions);
           imageDimensions = [parseInt(splitDimensions[0]), parseInt(splitDimensions[2])];
         }
