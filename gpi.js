@@ -1,36 +1,56 @@
 // ----------------------------------------------------------------------------------------
-// Google panic image v3 @ 18.06.2024
+// Google panic image v3 @ 19.06.2024
 // ----------------------------------------------------------------------------------------
 // Classname for panic button
 // ----------------------------------------------------------------------------------------
-const GOOGLE_PANIC_CLASS = 'Google-panic-image-btn';
-const overlayClassSelector = 'a.' + GOOGLE_PANIC_CLASS;
-const imgRegEx = /.*imgurl=(.[^\&]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i;
+const GOOGLE_PANIC_CLASS = 'Google-panic-image';
+const GOOGLE_PANIC_CLASS_BTN = 'Google-panic-image-btn';
+const overlayClassSelector = 'div.' + GOOGLE_PANIC_CLASS;
+
+const imgRegEx = /imgurl=(.[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i;
+const imgRegExNoFileName = /imgurl=(.[^\&\?]*)/i;
+const imgSizeRegEx = /(?<=[w|h]{1}=)([0-9]+)/ig;
+const imgSizeRegExLarge = /(?<=span[^>]+\>)([0-9\.\ \×]*)/i;
+
+const imgRegExSrc = /(.[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i;
+const imgRegExNoFileNameSrc = /(.[^\&\?]*)/i;
+
 let hasLargeImage = false;
 
-const gpiStyle = '.' + GOOGLE_PANIC_CLASS + ` {
+const gpiStyle = 'div.' + GOOGLE_PANIC_CLASS + ` {
         visibility: 'hidden';
         position: absolute;
         top: 10%;
         left: 0px;
         background: rgba(0,0,0,0.6);
         color: #fff;
-        font-weight: bold;
-        height: 1em;
-        padding: 0.5em 1.5em;
+        font-weight: normal;
+        min-height: 1em;
+        padding: 0.5em 1.5em 0.5em 0.5em;
         border-radius: 0px 12px 12px 0px;
         z-index: 1;
         line-height: 1em;
         font-size: 0.75rem;
         text-decoration: none;
-        border 1px solid #aaa;
+        border: 1px solid #aaa;
         border-left: none;
-        }`;
+}`;
+
+const gpiBtnStyle = 'a.' + GOOGLE_PANIC_CLASS_BTN + ` {
+        color: #fff;
+        font-weight: bold;
+        height: 1em;
+        padding: 0.5em 1.5em 0.5em 0.5em;
+        font-size: 0.75rem;
+        text-decoration: none;
+
+}`;
 
 // ----------------------------------------------------------------------------------------
 function addCSSStyle () {
   const styleSheet = document.styleSheets[0];
   styleSheet.insertRule(gpiStyle);
+  styleSheet.insertRule(gpiBtnStyle);
 }
 
 function parseRegularImage (target) {
@@ -39,28 +59,32 @@ function parseRegularImage (target) {
     return false;
   }
 
-  const imgRawURL = decodeURIComponent(img.href);
+  const imgRawURL = img.href;
 
   if (imgRawURL) {
-    const imgURL = imgRegEx.exec(imgRawURL);
+    let imgTarget;
+    let imgURL = imgRegEx.exec(imgRawURL);
     if (!imgURL) {
-      console.warn('imgURL not parsed correctly [parseRegularImage], URL:', imgRawURL.href);
-    } else {
-      const imgTarget = imgURL[1];
+      imgURL = imgRegExNoFileName.exec(imgRawURL);
+    }
+
+    if (imgURL) {
+      imgTarget = decodeURIComponent(imgURL[1]);
       return imgTarget;
     }
-  } else {
-    console.warn('imgRawURL not detected [parseRegularImage], URL:', img.href);
+
+    console.warn('imgURL not parsed correctly [parseRegularImage], URL:', imgRawURL.href);
   }
 
+  console.warn('imgRawURL not detected [parseRegularImage], URL:', img.href);
   return false;
 }
 
 function parseSubImage (target) {
   if (target.href) {
-    const imgURL = imgRegEx.exec(decodeURIComponent(target.href));
+    const imgURL = imgRegEx.exec(target.href);
     if (imgURL) {
-      return imgURL[1];
+      return decodeURIComponent(imgURL[1]);
     }
   }
   return false;
@@ -68,7 +92,14 @@ function parseSubImage (target) {
 
 function parseLargeImage (target) {
   if (target.dataset.gpiURI) {
-    return decodeURIComponent(target.dataset.gpiURI);
+    let imgURL = imgRegExSrc.exec(target.dataset.gpiURI);
+    if (!imgURL) {
+      imgURL = imgRegExNoFileNameSrc.exec(target.dataset.gpiURI);
+    }
+
+    if (imgURL) {
+      return decodeURIComponent(imgURL[1]);
+    }
   }
 
   console.warn('imgRawURL not detected [parseLargeImage], URL:', target);
@@ -89,9 +120,14 @@ function activateHover (evt) {
     return;
   }
 
+  const gpiTarget = evt.target.dataset.gpi;
+  if (!gpiTarget) {
+    return;
+  }
+
   let imgTarget;
 
-  switch (evt.target.dataset.gpi) {
+  switch (gpiTarget) {
     case 's':
       imgTarget = parseRegularImage(evt.target);
       break;
@@ -107,21 +143,52 @@ function activateHover (evt) {
   }
 
   if (imgTarget) {
+    const subDiv = document.createElement('div');
+    subDiv.className = GOOGLE_PANIC_CLASS;
+
     const domButton = document.createElement('a');
     domButton.target = '_blank';
     domButton.href = imgTarget;
     domButton.role = 'button';
-    domButton.className = GOOGLE_PANIC_CLASS;
+    domButton.className = GOOGLE_PANIC_CLASS_BTN;
+
     domButton.appendChild(document.createTextNode('VIEW'));
+    subDiv.appendChild(domButton);
+
+    let imageDimensions;
+    switch (evt.target.dataset.gpi) {
+      case 's':
+        imageDimensions = evt.target.innerHTML.match(imgSizeRegEx);
+        break;
+      case 'l':
+        imageDimensions = evt.target.innerHTML.match(imgSizeRegExLarge);
+        if (imageDimensions) {
+          const splitDimensions = imageDimensions[0].replace('.', '').split(' ', 3);
+          console.log(splitDimensions);
+          imageDimensions = [parseInt(splitDimensions[0]), parseInt(splitDimensions[2])];
+        }
+        break;
+      case 'sl':
+        imageDimensions = evt.target.href.match(imgSizeRegEx);
+        break;
+      default:
+        break;
+    }
+
+    if (imageDimensions) {
+      const width = imageDimensions[0];
+      const height = imageDimensions[1];
+      subDiv.appendChild(document.createTextNode(width + 'x' + height));
+    }
 
     switch (evt.target.dataset.gpi) {
       case 's':
-        evt.target.appendChild(domButton);
+        evt.target.appendChild(subDiv);
         domButton.addEventListener('click', openImage);
         break;
       case 'l':
       case 'sl':
-        evt.target.appendChild(domButton);
+        evt.target.appendChild(subDiv);
         break;
     }
   }
