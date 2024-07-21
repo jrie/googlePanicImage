@@ -7,12 +7,12 @@ const GOOGLE_PANIC_CLASS = 'Google-panic-image';
 const GOOGLE_PANIC_CLASS_BTN = 'Google-panic-image-btn';
 const overlayClassSelector = 'div.' + GOOGLE_PANIC_CLASS;
 
-const imgRegEx = /imgurl=(.[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i;
+const imgRegEx = /imgurl=(.[^\&\?]*\.(jpg|jpeg|gif|apng|png|webm|svg|tiff|webp|avif))/i;
 const imgRegExNoFileName = /imgurl=(.[^\&\?]*)/i;
 const imgSizeRegEx = /(?<=[w|h]{1}=)([0-9]+)/ig;
 const imgSizeRegExLarge = /(?<=span[^>]+\>)([0-9\.\ \×]*)/i;
 
-const imgRegExSrc = /(.[^\&\?]*\.(jpg|jpeg|gif|png|webm|svg|tiff|webp|avif))/i;
+const imgRegExSrc = /(.[^\&\?]*\.(jpg|jpeg|gif|apng|png|webm|svg|tiff|webp|avif))/i;
 const imgRegExNoFileNameSrc = /(.[^\&\?]*)/i;
 
 let hasLargeImage = false;
