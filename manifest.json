@@ -8,11 +8,11 @@
             "id": "{cef89dc3-7bbd-48c7-a43e-b1e8f9cffb9e}"
         }
     },
-    "description": "Displays a 'view' link above images of Google image search.",
+    "description": "Displays a 'view' link and 'image dimensions' on hover at images of Google image search.",
     "homepage_url": "https://github.com/jrie/googlePanicImage",
     "manifest_version": 3,
     "name": "GooglePanicImages",
-    "version": "3.0.2",
+    "version": "3.0.3",
     "host_permissions": [
         "<all_urls>"
     ],
