@@ -2,7 +2,7 @@
 Displays direct "view" links and "size" on images at Google Image search.
 
 ## Summary
-Once GooglePanicImages is enabled, and images are hovered over, a 'View' button and the image dimensions are displayed on top of images from Google Image search
+Once GooglePanicImages is enabled, and images are hovered over, a 'View' button and the image dimensions are displayed on top of images from Google Image search.
 Clicking on 'View' opens the source image directly in a new tab.
 
 ## Screenshot
