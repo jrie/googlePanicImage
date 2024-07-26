@@ -187,8 +187,11 @@ function activateHover (evt) {
         domButton.addEventListener('click', openImage);
         break;
       case 'l':
+        evt.target.appendChild(subDiv);
+        break;
       case 'sl':
         evt.target.appendChild(subDiv);
+        domButton.addEventListener('click', openImage);
         break;
     }
   }
@@ -253,7 +256,7 @@ function parseGallerySubImages () {
     }
 
     if (!img.href) {
-      img.dispatchEvent(new MouseEvent('mousedown', {
+      img.dispatchEvent(new window.MouseEvent('mousedown', {
         bubbles: true,
         button: 2
       }));
