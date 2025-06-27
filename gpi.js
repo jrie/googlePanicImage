@@ -10,7 +10,7 @@ const overlayClassSelector = 'div.' + GOOGLE_PANIC_CLASS;
 const imgRegEx = /imgurl=(.[^\&\?]*\.(jpg|jpeg|gif|apng|png|webm|svg|tiff|webp|avif))/i;
 const imgRegExNoFileName = /imgurl=(.[^\&\?]*)/i;
 const imgSizeRegEx = /(?<=[w|h]{1}=)([0-9]+)/ig;
-const imgSizeRegExLarge = /(?<=span[^>]+\>)([0-9\.\ \×]*)/i;
+const imgSizeRegExLarge = /(?<=span[^>]+\>)([0-9\.\,\ \×]*)/ig;
 
 const imgRegExSrc = /(.[^\&\?]*\.(jpg|jpeg|gif|apng|png|webm|svg|tiff|webp|avif))/i;
 const imgRegExNoFileNameSrc = /(.[^\&\?]*)/i;
@@ -163,8 +163,7 @@ function activateHover (evt) {
       case 'l':
         imageDimensions = evt.target.innerHTML.match(imgSizeRegExLarge);
         if (imageDimensions) {
-          const splitDimensions = imageDimensions[0].replace(/\./g, '').split(' ', 3);
-          console.log(splitDimensions);
+          const splitDimensions = imageDimensions[0].replace(/\.|\,/g, '').split(' ', 3);
           imageDimensions = [parseInt(splitDimensions[0]), parseInt(splitDimensions[2])];
         }
         break;
