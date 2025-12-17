@@ -1,5 +1,7 @@
 // ----------------------------------------------------------------------------------------
-// Google panic image v3 @ 19.06.2024
+// Google panic image v4.0.0 @ 17.12.2025
+// Author: Jan Riechers [ jan@dwrox.net ]
+// Ressource: https://github.com/jrie/googlePanicImage
 // ----------------------------------------------------------------------------------------
 // Classname for panic button
 // ----------------------------------------------------------------------------------------
@@ -7,315 +9,444 @@ const GOOGLE_PANIC_CLASS = 'Google-panic-image';
 const GOOGLE_PANIC_CLASS_BTN = 'Google-panic-image-btn';
 const overlayClassSelector = 'div.' + GOOGLE_PANIC_CLASS;
 
-const imgRegEx = /imgurl=(.[^\&\?]*\.(jpg|jpeg|gif|apng|png|webm|svg|tiff|webp|avif))/i;
-const imgRegExNoFileName = /imgurl=(.[^\&\?]*)/i;
-const imgSizeRegEx = /(?<=[w|h]{1}=)([0-9]+)/ig;
-const imgSizeRegExLarge = /(?<=span[^>]+\>)([0-9\.\,\ \×]*)/ig;
+const gpiStyle = 'div.' + GOOGLE_PANIC_CLASS + ' { box-sizing: border-box; padding:0; margin:0; line-height:0; position: absolute; top: 12%; left: 0px; background: rgba(0,0,0,0.7); color: #fff; font-weight: normal; border-radius: 0px 9px 9px 0px; z-index: 5; font-size: 0.75rem; text-decoration: 0; border: 1px solid #777; border-left: 0; max-height: 2.2rem; display: block; } ' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' {color: #fff; line-height: 0.9rem; font-size: inherit; font-weight: bold; font-size: 0.75rem; text-decoration: 0; cursor:pointer; padding: 0; margin: 0; padding: 0.4rem 0.5rem 0.6em 0.5rem; display: block; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' > span { line-height: 0.9rem; padding: 0; margin: 0; margin-left: 0.5rem; font-weight: normal; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ':hover { font-weight: bold; text-decoration:underline; }';
 
-const imgRegExSrc = /(.[^\&\?]*\.(jpg|jpeg|gif|apng|png|webm|svg|tiff|webp|avif))/i;
-const imgRegExNoFileNameSrc = /(.[^\&\?]*)/i;
+// -------------------------------------------------------------------------
+const debugShowType = false;
+const debugShowParsing = false;
+let operationMode = 1;
+let operationModeTitle = 'Google regular image search';
+if (window.location.search && !document.querySelector('body div#main[class="main"]')) {
+  operationMode = 2;
+  operationModeTitle = 'Google frontpage/frontpage image search';
+}
 
-let hasLargeImage = false;
+const useChrome = typeof (browser) === 'undefined';
 
-const gpiStyle = 'div.' + GOOGLE_PANIC_CLASS + ` {
-        visibility: 'hidden';
-        position: absolute;
-        top: 10%;
-        left: 0px;
-        background: rgba(0,0,0,0.6);
-        color: #fff;
-        font-weight: normal;
-        min-height: 1em;
-        padding: 0.5em 1.5em 0.5em 0.5em;
-        border-radius: 0px 12px 12px 0px;
-        z-index: 1;
-        line-height: 1em;
-        font-size: 0.75rem;
-        text-decoration: none;
-        border: 1px solid #aaa;
-        border-left: none;
-}`;
-
-const gpiBtnStyle = 'a.' + GOOGLE_PANIC_CLASS_BTN + ` {
-        color: #fff;
-        font-weight: bold;
-        height: 1em;
-        padding: 0.5em 1.5em 0.5em 0.5em;
-        font-size: 0.75rem;
-        text-decoration: none;
-
-}`;
+console.log('You are using GooglePanicImages v4.0.0');
+console.log(useChrome ? 'Running in a Chrome browser.' : 'Running in a non-Chrome browser.');
+console.log('We are in "operation mode ' + operationMode + '" which means we operate on "' + operationModeTitle + '"');
+console.log('If this mode differs from the current viewed page or you find a error, please open a bug ticket at: https://github.com/jrie/googlePanicImage');
 
 // ----------------------------------------------------------------------------------------
 function addCSSStyle () {
-  const styleSheet = document.styleSheets[0];
-  styleSheet.insertRule(gpiStyle);
-  styleSheet.insertRule(gpiBtnStyle);
+  const stylesheet = document.createElement('style');
+  stylesheet.appendChild(document.createTextNode(gpiStyle));
+  document.body.appendChild(stylesheet);
 }
 
-function parseRegularImage (target) {
-  const img = target.querySelector('a[href^="/imgres"]');
-  if (!img || !img.href) {
+function getControllerData (caller, controllerValue, id) {
+  if (debugShowType) {
+    switch (caller) {
+      case 's':
+        console.debug('Parsing "parseRegularImage" type.');
+        break;
+      case 'sl':
+        console.debug('Parsing "parseSimilarImage" type.');
+        break;
+      case 'l':
+        console.debug('Parsing "parseLargeImage" type.');
+        break;
+    }
+  }
+  const resultData = searchHayStack(controllerValue, id);
+  if (debugShowParsing) {
+    console.debug('getControllerData => resultData', resultData);
+  }
+
+  let srcString;
+
+  switch (caller) {
+    case 's':
+      srcString = 'parseRegularImage';
+      break;
+    case 'sl':
+      srcString = 'parseSimilarImage';
+      break;
+    case 'l':
+      srcString = 'parseLargeImage';
+      break;
+  }
+
+  if (!resultData || resultData === undefined) {
+    console.log('"Result data" for "' + srcString + '" undefined. If this happens multiple times, please report this as a bug: https://github.com/jrie/googlePanicImage');
+    return null;
+  }
+
+  const resultInfo = searchHayStack(resultData.keyData, '2000');
+
+  if (debugShowParsing) {
+    console.debug('getControllerData => resultInfo', resultInfo);
+  }
+
+  if (!resultInfo || resultInfo === undefined) {
+    console.log('"Result info" for "' + srcString + '" undefined. If this happens multiple times, please report this as a bug: https://github.com/jrie/googlePanicImage');
+    return null;
+  }
+
+  return { data: resultData.keyData, info: resultInfo, key: resultData.parentKey };
+}
+
+// -----------------------------------------------------------------------
+
+function findUpwards (targetAttribute, findValueIn, current) {
+  if (!current) {
     return false;
   }
 
-  const imgRawURL = img.href;
-
-  if (imgRawURL) {
-    let imgTarget;
-    let imgURL = imgRegEx.exec(imgRawURL);
-    if (!imgURL) {
-      imgURL = imgRegExNoFileName.exec(imgRawURL);
+  if (findValueIn !== null) {
+    if (current[findValueIn] && current[findValueIn][targetAttribute]) {
+      // console.log('current found for findValueIn', targetAttribute);
+      // console.log('current-value', current[findValueIn][targetAttribute]);
+      return current[findValueIn][targetAttribute];
     }
-
-    if (imgURL) {
-      imgTarget = decodeURIComponent(imgURL[1]);
-      return imgTarget;
-    }
-
-    console.warn('imgURL not parsed correctly [parseRegularImage], URL:', imgRawURL.href);
+  } else if (current[targetAttribute]) {
+    // console.log('current found for targetAttribute', current);
+    // console.log('current-value', current[targetAttribute]);
+    return current[targetAttribute];
   }
 
-  console.warn('imgRawURL not detected [parseRegularImage], URL:', img.href);
-  return false;
+  return findUpwards(targetAttribute, findValueIn, current.parentNode);
 }
 
-function parseSubImage (target) {
-  if (target.href) {
-    const imgURL = imgRegEx.exec(target.href);
-    if (imgURL) {
-      return decodeURIComponent(imgURL[1]);
+// -----------------------------------------------------------------------
+
+function parseImageByType (imageType, target) {
+  const imageTypeOperationMode = {
+    1: {
+      id: {
+        s: 'docid',
+        sl: 'docid',
+        l: 'id'
+      }
+    },
+    2: {
+      id: {
+        s: 'id',
+        sl: 'docid',
+        l: 'id'
+      }
+    }
+  };
+
+  const controllerSrc = findUpwards('__jscontroller', null, target);
+  const controllerData = controllerSrc.pending.value;
+  if (debugShowParsing) {
+    console.debug('find upwards result controllerData:', controllerData);
+  }
+
+  let type = 'parseRegularImage';
+  switch (imageType) {
+    case 's':
+      type = 'parseRegularImage';
+      break;
+    case 'sl':
+      type = 'parseSimiliarImage';
+      break;
+    case 'l':
+      type = 'parseLargeImage';
+      break;
+    default:
+      break;
+  }
+
+  let idData = null;
+  let imageData = {};
+
+  if (imageType === 'l') {
+    idData = findUpwards(imageTypeOperationMode[operationMode].id[imageType], 'dataset', target);
+  } else if (operationMode !== 1 && imageType === 's') {
+    idData = findUpwards('id', null, target);
+  }
+
+  if (!idData) {
+    idData = findUpwards(imageTypeOperationMode[operationMode].id[imageType], 'dataset', target);
+  }
+
+  if (!idData) {
+    console.log('No "idData" for "' + type + '" in "operation mode=' + operationMode + '"  found.');
+  }
+
+  imageData = getControllerData(imageType, controllerData, idData);
+
+  if (debugShowParsing) {
+    console.debug('find upwards result idData:', idData);
+  }
+
+  if (imageData && imageData.data !== undefined) {
+    if (imageType === 'l') {
+      imageData.data[3] = imageData.data[3][imageData.key];
     }
   }
-  return false;
-}
 
-function parseLargeImage (target) {
-  if (target.dataset.gpiURI) {
-    let imgURL = imgRegExSrc.exec(target.dataset.gpiURI);
-    if (!imgURL) {
-      imgURL = imgRegExNoFileNameSrc.exec(target.dataset.gpiURI);
-    }
-
-    if (imgURL) {
-      return decodeURIComponent(imgURL[1]);
-    }
+  if (!imageData || imageData.data === undefined) {
+    console.log('No "imageData" for "' + type + '" in "operation mode=' + operationMode + '"  found.');
+    return null;
   }
 
-  console.warn('imgRawURL not detected [parseLargeImage], URL:', target);
-  return false;
+  return imageData;
 }
 
 function deactivateHover (evt) {
-  const overlay = evt.target.querySelector(overlayClassSelector);
-  if (overlay) {
-    overlay.style.visibility = 'hidden';
+  if (evt.target.dataset.gpi === undefined || (evt.relatedTarget && evt.relatedTarget.classList.contains(GOOGLE_PANIC_CLASS_BTN))) {
+    return;
+  }
+
+  const overlays = document.querySelectorAll(overlayClassSelector);
+  if (overlays) {
+    for (const overlay of overlays) {
+      overlay.parentNode.removeChild(overlay);
+    }
   }
 }
 
 function activateHover (evt) {
-  const overlay = evt.target.querySelector(overlayClassSelector);
-  if (overlay) {
-    overlay.style.visibility = 'visible';
+  const gpiTargetType = evt.target.dataset.gpi;
+
+  if (!gpiTargetType) {
     return;
   }
 
-  const gpiTarget = evt.target.dataset.gpi;
-  if (!gpiTarget) {
+  const overlays = document.querySelectorAll(overlayClassSelector);
+  if (overlays) {
+    for (const overlay of overlays) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  const imgData = parseImageByType(gpiTargetType, evt.target);
+  if (imgData === null) {
+    console.log('Image data of "parseImageByType" undefined. Please check the logs and or report as a bug if this happens to continue at: https://github.com/jrie/googlePanicImage');
     return;
   }
 
-  let imgTarget;
+  const subDiv = document.createElement('div');
+  subDiv.className = GOOGLE_PANIC_CLASS;
 
-  switch (gpiTarget) {
-    case 's':
-      imgTarget = parseRegularImage(evt.target);
-      break;
-    case 'l':
-      imgTarget = parseLargeImage(evt.target);
-      break;
-    case 'sl':
-      imgTarget = parseSubImage(evt.target);
-      break;
-    default:
-      console.warn('dataset \'gpi\' missing [activateHover]');
-      break;
-  }
+  const domButton = document.createElement('a');
+  domButton.target = '_blank';
+  domButton.href = imgData.data[3][0];
+  domButton.role = 'button';
+  domButton.className = GOOGLE_PANIC_CLASS_BTN;
 
-  if (imgTarget) {
-    const subDiv = document.createElement('div');
-    subDiv.className = GOOGLE_PANIC_CLASS;
+  const width = imgData.data[3][2];
+  const height = imgData.data[3][1];
+  const imgSize = imgData.info[2];
 
-    const domButton = document.createElement('a');
-    domButton.target = '_blank';
-    domButton.href = imgTarget;
-    domButton.role = 'button';
-    domButton.className = GOOGLE_PANIC_CLASS_BTN;
+  const dimensionSpan = document.createElement('span');
+  dimensionSpan.appendChild(document.createTextNode(width + 'x' + height + 'px'));
 
-    domButton.appendChild(document.createTextNode('VIEW'));
-    subDiv.appendChild(domButton);
+  const sizeSpan = document.createElement('span');
+  sizeSpan.appendChild(document.createTextNode(imgSize));
 
-    let imageDimensions;
-    switch (evt.target.dataset.gpi) {
+  domButton.appendChild(document.createTextNode('VIEW'));
+  domButton.appendChild(dimensionSpan);
+  domButton.appendChild(sizeSpan);
+
+  if (operationMode === 1) {
+    switch (gpiTargetType) {
       case 's':
-        imageDimensions = evt.target.innerHTML.match(imgSizeRegEx);
+        evt.target.children[1].appendChild(subDiv);
+        break;
+      case 'sl':
+        evt.target.children[0].prepend(subDiv);
         break;
       case 'l':
-        imageDimensions = evt.target.innerHTML.match(imgSizeRegExLarge);
-        if (imageDimensions) {
-          const splitDimensions = imageDimensions[0].replace(/\.|\,/g, '').split(' ', 3);
-          imageDimensions = [parseInt(splitDimensions[0]), parseInt(splitDimensions[2])];
+        evt.target.appendChild(subDiv);
+        break;
+    }
+  } else {
+    switch (gpiTargetType) {
+      case 's':
+        if (useChrome) {
+          evt.target.parentNode.parentNode.prepend(subDiv);
+        } else {
+          evt.target.prepend(subDiv);
         }
         break;
       case 'sl':
-        imageDimensions = evt.target.href.match(imgSizeRegEx);
-        break;
-      default:
-        break;
-    }
+        if (useChrome) {
+          evt.target.parentNode.parentNode.parentNode.prepend(subDiv);
+        } else {
+          evt.target.prepend(subDiv);
+        }
 
-    if (imageDimensions) {
-      const width = imageDimensions[0];
-      const height = imageDimensions[1];
-      subDiv.appendChild(document.createTextNode(width + 'x' + height));
-    }
-
-    switch (evt.target.dataset.gpi) {
-      case 's':
-        evt.target.appendChild(subDiv);
-        domButton.addEventListener('click', openImage);
         break;
       case 'l':
         evt.target.appendChild(subDiv);
         break;
-      case 'sl':
-        evt.target.appendChild(subDiv);
-        domButton.addEventListener('click', openImage);
-        break;
     }
   }
+
+  if (useChrome) {
+    subDiv.parentNode.style.overflow = 'visible';
+  }
+
+  subDiv.appendChild(domButton);
+  domButton.addEventListener('click', openImage);
 }
 
 function openImage (evt) {
-  window.open(evt.target.href, '_blank');
+  let target = evt.target;
+  if (target.nodeName !== 'A') {
+    target = target.parentNode;
+  }
+
+  window.open(target, '_blank');
 }
 
-function deactivateLarge (evt) {
-  hasLargeImage = false;
-}
-
-function addHandler (target) {
-  switch (target.dataset.gpi) {
-    case 'b':
-      target.addEventListener('mouseenter', deactivateLarge);
-      break;
+function addHandler (target, type) {
+  switch (type) {
     case 's':
       target.addEventListener('mouseenter', activateHover);
-      target.addEventListener('mousemove', activateHover);
-      target.addEventListener('mouseleave', deactivateHover);
-      target.addEventListener('click', deactivateLarge);
-      break;
-    case 'l':
-      target.addEventListener('mouseenter', activateHover);
-      target.addEventListener('mousemove', activateHover);
       target.addEventListener('mouseleave', deactivateHover);
       break;
     case 'sl':
       target.addEventListener('mouseenter', activateHover);
-      target.addEventListener('mousemove', activateHover);
       target.addEventListener('mouseleave', deactivateHover);
-      target.addEventListener('click', deactivateLarge);
+      break;
+    case 'l':
+      target.addEventListener('mouseenter', activateHover);
+      target.addEventListener('mouseleave', deactivateHover);
+      break;
+    default:
       break;
   }
 }
 
 function parseImages () {
-  // Regular view
-  const regularImages = document.querySelectorAll('div[data-attrid^="images"]');
-  for (const img of regularImages) {
-    if (img.dataset.gpi) {
-      continue;
+  const operationModes = {
+    1: {
+      l: 'div[data-gap] div[aria-hidden="false"] div[jsaction^="trigger."]',
+      sl: 'div[data-gap] div[aria-hidden="false"] div[data-snf] div[data-docid]',
+      s: 'div#search div[data-docid]'
+    },
+    2: {
+      l: 'div:not(#search) a[rel="noopener"]:has(> img)',
+      sl: 'div:not(#search) div[data-snc] div:has(> img)',
+      s: 'div:not(#rcnt) div[role="button"]:has(img)'
     }
-
-    img.dataset.gpi = 's';
-    addHandler(img);
-  }
-}
-
-function parseGallerySubImages () {
-  // Gallery subimages view
-  const gallerySubImages = document.querySelectorAll('a[data-nav="1"]');
-  for (const img of gallerySubImages) {
-    if (img.dataset.gpi) {
-      continue;
-    }
-
-    if (img.src) {
-      continue;
-    }
-
-    if (!img.href) {
-      img.dispatchEvent(new window.MouseEvent('mousedown', {
-        bubbles: true,
-        button: 2
-      }));
-
-      continue;
-    }
-
-    img.dataset.gpi = 'sl';
-    img.dataset.gpiURI = img.href;
-    addHandler(img);
-  }
-}
-
-function parseLarge (target) {
-  // Detail gallery view
-  target.parentNode.dataset.gpi = 'l';
-  target.parentNode.dataset.gpiURI = target.src;
-  addHandler(target.parentNode);
-  hasLargeImage = true;
-}
-
-function parseControls () {
-  const controls = document.querySelectorAll('button[aria-disabled="false"]');
-  for (const control of controls) {
-    if (!control.dataset.gpi) {
-      control.dataset.gpi = 'b';
-      addHandler(control);
-    }
-  }
-}
-
-function mutationCallback (mutations, observer) {
-  if (hasLargeImage) {
-    window.requestAnimationFrame(parseGallerySubImages);
-    return;
+  };
+  if (operationMode === 2 && useChrome) {
+    operationModes[2].s = 'div#rcnt div[role="button"]:has(img)';
   }
 
-  for (const mutation of mutations) {
-    if (mutation.target.nodeName === 'IMG' && mutation.target.src) {
-      if (mutation.target.src.startsWith('https://encrypted-tb')) {
+  const parsingSelectors = operationModes[operationMode];
+
+  for (const [type, cssSelector] of Object.entries(parsingSelectors)) {
+    const images = document.querySelectorAll(cssSelector);
+
+    for (const img of images) {
+      if (img.dataset.gpi !== undefined) {
         continue;
       }
 
-      parseLarge(mutation.target);
-      parseControls();
-      return;
+      img.dataset.gpi = type;
+      addHandler(img, type);
     }
   }
 }
 
+// -------------------------------------------------------------------------
+
+function isInstanceOf (src, comp) {
+  return src instanceof comp;
+}
+
+// -------------------------------------------------------------------------
+
+function searchHayStack (hayStack, searchValue, analyzedKeys, parent, parentKey) {
+  if (analyzedKeys === undefined) {
+    analyzedKeys = [];
+  }
+
+  if (parent === undefined) {
+    parent = null;
+  }
+
+  if (parentKey === undefined) {
+    parentKey = null;
+  }
+
+  if (isInstanceOf(hayStack, Function)) {
+    return false;
+  } else if (isInstanceOf(hayStack, window.Node)) {
+    return false;
+  }
+
+  if (isInstanceOf(hayStack, Array)) {
+    // console.debug('Haystack is array:', hayStack);
+    for (const arrayItem of hayStack) {
+      const result = searchHayStack(arrayItem, searchValue, analyzedKeys, parent, parentKey);
+      if (result) {
+        return result;
+      }
+    }
+  } else if (isInstanceOf(hayStack, Object)) {
+    if (Object.keys(hayStack).includes(searchValue)) {
+      return hayStack[searchValue];
+    }
+
+    for (const [key, value] of Object.entries(hayStack)) {
+      if (analyzedKeys.includes(key)) {
+        // console.debug('Searching in Object, key', key);
+        continue;
+      }
+
+      analyzedKeys.push(key);
+
+      const result = searchHayStack(value, searchValue, analyzedKeys, hayStack[key], key);
+      if (result) {
+        return result;
+      }
+    }
+  } else if (hayStack === searchValue) {
+    // console.debug('Haystack is single value, we found it in: ', hayStack);
+
+    const keyData = Object.assign(
+      {},
+      {
+        parsed: true,
+        hayStack,
+        needle: searchValue,
+        parentKey,
+        parentData: parent,
+        keyData: parent
+      }
+    );
+
+    if (parent) {
+      for (const entry of parent) {
+        if (isInstanceOf(entry, Object) && Object.keys(entry).includes(parentKey)) {
+          keyData.keyData = Object.assign({}, entry[parentKey]);
+          return keyData;
+        }
+      }
+    }
+
+    return keyData;
+  }
+
+  return false;
+}
+
+// -------------------------------------------------------------------------
+
+function mutationCallback () {
+  parseImages();
+}
+
 // ----------------------------------------------------------------------------------------
-const observer = new MutationObserver(mutationCallback);
+const observer = new window.MutationObserver(mutationCallback);
 const observerConfig = {
-  attributes: true,
-  attributeFilter: ['style'],
-  subtree: true
+  subtree: true,
+  childList: true,
+  attributes: true
 };
 
-window.addEventListener('scrollend', parseImages);
+// -------------------------------------------------------------------------
+
+// window.addEventListener('scrollend', parseImages);
 window.requestAnimationFrame(addCSSStyle);
 window.requestAnimationFrame(parseImages);
-window.requestAnimationFrame(parseGallerySubImages);
 observer.observe(document.body, observerConfig);
