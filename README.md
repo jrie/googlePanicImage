@@ -10,7 +10,7 @@ No additional requests to any of the sites is down, the data is.. "provided" ;)
 <img width="1196" height="761" alt="image" src="https://github.com/user-attachments/assets/9ef6a4d6-896e-4a49-80ae-944d48a58ac9" />
 
 ## Download as addon
-*Note*: The addon is currentonly only published in "Version 4.x" for Firefox and Chrome.
+*Note*: The addon is current only published in "Version 4.x" for Firefox and Chrome - other versions are on the way asap.
 
 The addon can be downloaded here: [Firefox](https://addons.mozilla.org/en-US/firefox/addon/googlepanicimages/) | [Chrome](https://chrome.google.com/webstore/detail/googlepanicimages/ofnokbendbpfgbomaepcomeciblhphip) | [Opera](https://addons.opera.com/en/extensions/details/googlepanicimages/) | [Edge](https://microsoftedge.microsoft.com/addons/detail/cllbfapjhkobfdechjnofjbgejdebdgn)
 
