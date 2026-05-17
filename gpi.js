@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------------
-// Google panic image v4.0.0 @ 17.12.2025
+// Google panic image v4.1.0 @ 17.05.2026
 // Author: Jan Riechers [ jan@dwrox.net ]
 // Ressource: https://github.com/jrie/googlePanicImage
 // ----------------------------------------------------------------------------------------
@@ -9,21 +9,21 @@ const GOOGLE_PANIC_CLASS = 'Google-panic-image';
 const GOOGLE_PANIC_CLASS_BTN = 'Google-panic-image-btn';
 const overlayClassSelector = 'div.' + GOOGLE_PANIC_CLASS;
 
-const gpiStyle = 'div.' + GOOGLE_PANIC_CLASS + ' { box-sizing: border-box; padding:0; margin:0; line-height:0; position: absolute; top: 12%; left: 0px; background: rgba(0,0,0,0.7); color: #fff; font-weight: normal; border-radius: 0px 9px 9px 0px; z-index: 5; font-size: 0.75rem; text-decoration: 0; border: 1px solid #777; border-left: 0; max-height: 2.2rem; display: block; } ' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' {color: #fff; line-height: 0.9rem; font-size: inherit; font-weight: bold; font-size: 0.75rem; text-decoration: 0; cursor:pointer; padding: 0; margin: 0; padding: 0.4rem 0.5rem 0.6em 0.5rem; display: block; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' > span { line-height: 0.9rem; padding: 0; margin: 0; margin-left: 0.5rem; font-weight: normal; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ':hover { font-weight: bold; text-decoration:underline; }';
-
+const gpiStyle = 'div.' + GOOGLE_PANIC_CLASS + ' { box-sizing: border-box; padding:0; margin:0; line-height: 1em; position: absolute; top: 12%; left: 0px; background: rgba(0,0,0,0.8); color: #fff; font-weight: normal; border-radius: 0px 9px 9px 0px; z-index: 5; font-size: 0.75rem; text-decoration: 0; border: 1px solid #777; border-left: 0; max-height: 2.2rem; display: block; } ' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' {color: #fff; line-height: 0.9rem; font-size: inherit; font-weight: bold; font-size: 0.75rem; text-decoration: 0; cursor:pointer; padding: 0; margin: 0; padding: 0.4rem 0.5rem 0.6em 0.5rem; display: block; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' > span { line-height: 0.9rem; padding: 0; margin: 0; margin-left: 0.5rem; font-weight: normal; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ':hover { font-weight: bold; text-decoration:underline; } .gpi-dimensions { position: absolute; border-radius: 1.7em; right: 0.7rem; bottom: 4rem; color:#99c3ff; line-height: 1.2rem; min-height: 1.2rem; font-size: 0.8em; font-weight: bold; margin-top: 0.3em; text-align: right; background-color: rgba(0,0,0,0.7); padding: 0.3rem 1.2em; }';
 // -------------------------------------------------------------------------
 const debugShowType = false;
 const debugShowParsing = false;
+const debugShowControllerDataInfo = false;
+
 let operationMode = 1;
 let operationModeTitle = 'Google regular image search';
 if (window.location.search && !document.querySelector('body div#main[class="main"]')) {
   operationMode = 2;
   operationModeTitle = 'Google frontpage/frontpage image search';
 }
-
 const useChrome = typeof (browser) === 'undefined';
 
-console.log('You are using GooglePanicImages v4.0.0');
+console.log('You are using GooglePanicImages v4.1.0');
 console.log(useChrome ? 'Running in a Chrome browser.' : 'Running in a non-Chrome browser.');
 console.log('We are in "operation mode ' + operationMode + '" which means we operate on "' + operationModeTitle + '"');
 console.log('If this mode differs from the current viewed page or you find a error, please open a bug ticket at: https://github.com/jrie/googlePanicImage');
@@ -36,7 +36,7 @@ function addCSSStyle () {
 }
 
 function getControllerData (caller, controllerValue, id) {
-  if (debugShowType) {
+  if (debugShowType || debugShowControllerDataInfo) {
     switch (caller) {
       case 's':
         console.debug('Parsing "parseRegularImage" type.');
@@ -49,6 +49,12 @@ function getControllerData (caller, controllerValue, id) {
         break;
     }
   }
+
+  if (debugShowControllerDataInfo) {
+    console.debug('getControllerData "controllerValue": ', controllerValue);
+    console.debug('getControllerData "id": ', id);
+  }
+
   const resultData = searchHayStack(controllerValue, id);
   if (debugShowParsing) {
     console.debug('getControllerData => resultData', resultData);
@@ -69,7 +75,7 @@ function getControllerData (caller, controllerValue, id) {
   }
 
   if (!resultData || resultData === undefined) {
-    console.log('"Result data" for "' + srcString + '" undefined. If this happens multiple times, please report this as a bug: https://github.com/jrie/googlePanicImage');
+    console.debug('"Result data" for "' + srcString + '" undefined. If this happens multiple times, please report this as a bug: https://github.com/jrie/googlePanicImage');
     return null;
   }
 
@@ -80,7 +86,7 @@ function getControllerData (caller, controllerValue, id) {
   }
 
   if (!resultInfo || resultInfo === undefined) {
-    console.log('"Result info" for "' + srcString + '" undefined. If this happens multiple times, please report this as a bug: https://github.com/jrie/googlePanicImage');
+    console.debug('"Result info" for "' + srcString + '" undefined. If this happens multiple times, please report this as a bug: https://github.com/jrie/googlePanicImage');
     return null;
   }
 
@@ -130,9 +136,15 @@ function parseImageByType (imageType, target) {
   };
 
   const controllerSrc = findUpwards('__jscontroller', null, target);
-  const controllerData = controllerSrc.pending.value;
-  if (debugShowParsing) {
-    console.debug('find upwards result controllerData:', controllerData);
+  let controllerData = null;
+
+  if (controllerSrc.pending) {
+    controllerData = controllerSrc.pending.value;
+    if (debugShowParsing) {
+      console.debug('find upwards result controllerData:', controllerData);
+    }
+  } else {
+    return null;
   }
 
   let type = 'parseRegularImage';
@@ -164,7 +176,7 @@ function parseImageByType (imageType, target) {
   }
 
   if (!idData) {
-    console.log('No "idData" for "' + type + '" in "operation mode=' + operationMode + '"  found.');
+    console.debug('No "idData" for "' + type + '" in "operation mode=' + operationMode + '"  found.');
   }
 
   imageData = getControllerData(imageType, controllerData, idData);
@@ -180,7 +192,7 @@ function parseImageByType (imageType, target) {
   }
 
   if (!imageData || imageData.data === undefined) {
-    console.log('No "imageData" for "' + type + '" in "operation mode=' + operationMode + '"  found.');
+    console.debug('No "imageData" for "' + type + '" in "operation mode=' + operationMode + '"  found.');
     return null;
   }
 
@@ -201,9 +213,9 @@ function deactivateHover (evt) {
 }
 
 function activateHover (evt) {
-  const gpiTargetType = evt.target.dataset.gpi;
+  const type = evt.target.dataset.gpi;
 
-  if (!gpiTargetType) {
+  if (!type) {
     return;
   }
 
@@ -214,7 +226,7 @@ function activateHover (evt) {
     }
   }
 
-  const imgData = parseImageByType(gpiTargetType, evt.target);
+  const imgData = parseImageByType(type, evt.target);
   if (imgData === null) {
     console.log('Image data of "parseImageByType" undefined. Please check the logs and or report as a bug if this happens to continue at: https://github.com/jrie/googlePanicImage');
     return;
@@ -243,39 +255,53 @@ function activateHover (evt) {
   domButton.appendChild(dimensionSpan);
   domButton.appendChild(sizeSpan);
 
+  let operationTarget = evt.target;
+  let operationAction = 'append';
+
   if (operationMode === 1) {
-    switch (gpiTargetType) {
+    switch (type) {
       case 's':
-        evt.target.children[1].appendChild(subDiv);
+        operationTarget = evt.target.children[1];
         break;
       case 'sl':
-        evt.target.children[0].prepend(subDiv);
+        operationTarget = evt.target.children[0];
+        operationAction = 'prepend';
         break;
       case 'l':
-        evt.target.appendChild(subDiv);
+        operationTarget = evt.target;
         break;
     }
   } else {
-    switch (gpiTargetType) {
+    switch (type) {
       case 's':
         if (useChrome) {
-          evt.target.parentNode.parentNode.prepend(subDiv);
+          operationTarget = evt.target.parentNode.parentNode;
+          operationAction = 'prepend';
         } else {
-          evt.target.prepend(subDiv);
+          operationTarget = evt.target;
+          operationAction = 'prepend';
         }
         break;
       case 'sl':
         if (useChrome) {
-          evt.target.parentNode.parentNode.parentNode.prepend(subDiv);
+          operationTarget = evt.target.parentNode.parentNode.parentNode;
+          operationAction = 'prepend';
         } else {
-          evt.target.prepend(subDiv);
+          operationTarget = evt.target;
+          operationAction = 'prepend';
         }
 
         break;
       case 'l':
-        evt.target.appendChild(subDiv);
+        operationTarget = evt.target.parentNode.parentNode.parentNode;
         break;
     }
+  }
+
+  if (operationAction === 'append') {
+    operationTarget.append(subDiv);
+  } else {
+    operationTarget.prepend(subDiv);
   }
 
   if (useChrome) {
@@ -327,6 +353,7 @@ function parseImages () {
       s: 'div:not(#rcnt) div[role="button"]:has(img)'
     }
   };
+
   if (operationMode === 2 && useChrome) {
     operationModes[2].s = 'div#rcnt div[role="button"]:has(img)';
   }
@@ -345,6 +372,46 @@ function parseImages () {
       addHandler(img, type);
     }
   }
+}
+
+function applyOptions (imgTarget, type) {
+  if (!hasOptions) {
+    return;
+  }
+
+  const imgData = parseImageByType(type, imgTarget);
+
+  if (imgData === null) {
+    return;
+  }
+
+  if (addonOptions['gpi-show-image-size-on-all']) {
+    const hasDimensions = imgTarget.querySelector('span.gpi-dimensions');
+    if (hasDimensions) {
+      return;
+    }
+    switch (type) {
+      case 's':
+        imgTarget.parentNode.parentNode.style = 'position:relative;';
+        break;
+      case 'sl':
+        imgTarget.style = 'position:relative;';
+        break;
+      case 'l':
+        imgTarget.parentNode.style = 'position:relative;';
+        break;
+    }
+
+    const dimensionSpan = document.createElement('span');
+    dimensionSpan.className = 'gpi-dimensions';
+
+    const width = imgData.data[3][2];
+    const height = imgData.data[3][1];
+    dimensionSpan.appendChild(document.createTextNode(width + 'x' + height + 'px'));
+    imgTarget.appendChild(dimensionSpan);
+  }
+
+  imgTarget.dataset.gpiopsapplied = true;
 }
 
 // -------------------------------------------------------------------------
@@ -431,9 +498,17 @@ function searchHayStack (hayStack, searchValue, analyzedKeys, parent, parentKey)
 }
 
 // -------------------------------------------------------------------------
-
 function mutationCallback () {
+  observer.takeRecords();
   parseImages();
+
+  if (hasOptions) {
+    const gpiNodes = document.querySelectorAll('[data-gpi]:not([data-gpiopsapplied])');
+
+    for (const node of gpiNodes) {
+      applyOptions(node, node.dataset.gpi);
+    }
+  }
 }
 
 // ----------------------------------------------------------------------------------------
@@ -441,12 +516,22 @@ const observer = new window.MutationObserver(mutationCallback);
 const observerConfig = {
   subtree: true,
   childList: true,
-  attributes: true
+  attributes: false
 };
 
 // -------------------------------------------------------------------------
+let addonOptions = {};
+let hasOptions = false;
+
+if (window.gpi) {
+  addonOptions = Object.assign({}, window.gpi);
+  console.log('Options loaded...', addonOptions);
+  delete window.gpi;
+
+  hasOptions = true;
+}
 
 // window.addEventListener('scrollend', parseImages);
 window.requestAnimationFrame(addCSSStyle);
 window.requestAnimationFrame(parseImages);
-observer.observe(document.body, observerConfig);
+observer.observe(document, observerConfig);

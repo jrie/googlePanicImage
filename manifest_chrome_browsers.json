@@ -3,7 +3,21 @@
     "homepage_url": "https://github.com/jrie/googlePanicImage",
     "manifest_version": 3,
     "name": "GooglePanicImages",
-    "version": "4.0.0",
+    "version": "4.1.0",
+	"action": {
+		"default_title": "googlePanicImage",
+		"default_popup": "popup.html"
+	},
+    "permissions": [
+        "tabs",
+        "scripting",
+        "storage"
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
     "host_permissions": [
         "*://www.google.com/*",
         "*://www.google.ad/*",
@@ -192,17 +206,5 @@
         "*://www.google.co.zm/*",
         "*://www.google.co.zw/*",
         "*://www.google.cat/*"
-    ],
-    "content_scripts": [
-        {
-            "matches": [
-                "*://*/search*"
-            ],
-            "js": [
-                "gpi.js"
-            ],
-            "all_frames": true,
-            "world": "MAIN"
-        }
     ]
 }

@@ -1,0 +1,49 @@
+body {
+    background-color: #333;
+    color: #ccc;
+    margin: 1.3em 1.7em;
+    font-size: 1em;
+    font-family: monospace;
+}
+
+h1,
+h2 {
+    padding: 0;
+    margin: 0;
+    text-transform: uppercase;
+    margin-bottom: 0.3em;
+    font-size: 130%;
+}
+
+h2 {
+    font-size: 100%;
+    margin-bottom: 1em;
+}
+
+hr {
+    margin-bottom: 1.3em;
+}
+
+label,
+input {
+    line-height: 1em;
+    vertical-align: text-top;
+}
+
+input {
+    margin: 0;
+    padding: 0;
+}
+
+.optionsNote {
+    border: 1px solid #444;
+    padding: 0.7rem 1rem;
+}
+
+.option-label {
+    display: inline-block;
+    color: #aaa;
+    margin-bottom: 0.7em;
+    font-weight: bold;
+    margin-right: 0.7em;
+}
