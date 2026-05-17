@@ -4,13 +4,10 @@ Displays direct "view" link, "image size" and "picture sizes" on images at Googl
 ## Screenshot of a Google image search
 <img width="1196" height="761" alt="Image of a search in Google images" src="https://github.com/user-attachments/assets/9ef6a4d6-896e-4a49-80ae-944d48a58ac9" />
 
-
-
 ## Summary
-Once GooglePanicImages is enabled, images on Google which are hovered over with the mouse are showing a "View" button to open the image directly, and additional image details like dimensions and byte/kb/mb sizes are shown.
+Once GooglePanicImages is enabled, images on Google image search, which are mouse overed/hovered show a "View" button to open the image directly, and additional image details like dimensions/resolution and byte/kb/mb sizes are shown.
 
-No additional requests to any of the website are made, the data is.. "provided" ;)
-
+No additional requests to any of the websites are made, the data is.. "provided" ;)
 
 ## Download as addon
 *Note*: The addon is current only published in "Version 4.x" for Firefox and Chrome - other versions are on the way asap.
