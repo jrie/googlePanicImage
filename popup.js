@@ -2,12 +2,47 @@ const useChrome = typeof (browser) === 'undefined';
 
 // --------------------------------------------------------------------
 function saveOptions (evt) {
-  const optionName = 'gpi-' + evt.target.name;
+  const optionPrefix = 'gpi-';
+  let value = null;
+  let parent = false;
+
+  switch (evt.target.type) {
+    case 'checkbox':
+      value = evt.target.checked;
+      break;
+    default:
+      break;
+  }
+
+  let connectedOptions = null;
+  let optionName = null;
 
   switch (evt.target.name) {
     case 'show-image-size-on-all':
-      if (evt.target.type === 'checkbox') {
-        useChrome ? chrome.storage.local.set({ [optionName]: evt.target.checked }) : browser.storage.local.set({ [optionName]: evt.target.checked });
+    case 'show-image-size-on-underneath':
+      connectedOptions = document.querySelectorAll('[name="show-image-size-on-all"], [name="show-image-size-on-underneath"]');
+      parent = 'show-image-size-on-all';
+
+      if (connectedOptions) {
+        parent = connectedOptions[0];
+
+        for (const option of connectedOptions) {
+          optionName = optionPrefix + option.name;
+
+          if (option !== parent) {
+            if (option.type === 'checkbox' && !value) {
+              option.checked = value;
+            }
+
+            if (option.type === 'checkbox') {
+              useChrome ? chrome.storage.local.set({ [optionName]: option.checked }) : browser.storage.local.set({ [optionName]: option.checked });
+            }
+          } else if (option === evt.target) {
+            if (option.type === 'checkbox') {
+              useChrome ? chrome.storage.local.set({ [optionName]: option.checked }) : browser.storage.local.set({ [optionName]: option.checked });
+            }
+          }
+        }
       }
 
       break;
@@ -31,10 +66,12 @@ function loadOptions (data) {
 }
 
 // --------------------------------------------------------------------
-const showImageSizesOnAll = document.querySelector('input[name="show-image-size-on-all"]');
+const inputFields = document.querySelectorAll('input');
 
-if (showImageSizesOnAll) {
-  showImageSizesOnAll.addEventListener('change', saveOptions);
+if (inputFields) {
+  for (const input of inputFields) {
+    input.addEventListener('change', saveOptions);
+  }
 }
 
 useChrome ? chrome.storage.local.get().then(loadOptions) : browser.storage.local.get().then(loadOptions);

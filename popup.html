@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <title>googlePanicImages - Settings</title>
   <meta charset="utf-8">
@@ -8,15 +7,27 @@
 </head>
 
 <body>
-  <h1>googlePanicImages settings</h1>
-  <hr>
-  <p class="optionsNote">Note: Please reload the tab in order for settings to be applied!</p>
-  <div>
-    <h2>Options:</h2>
-    <label class="option-label" for="show-image-size-on-all">Show image size preview on unfocused images?</label>
-    <input type="checkbox" name="show-image-size-on-all">
+  <h1>googlePanicImages options</h1>
+  <div class="border">
+    <p class="optionsNote">Note: Please reload the Google image tab in order for settings to be applied!</p>
+    <ul class="options border">
+      <li>
+        <label class="option-label" for="show-image-size-on-all">
+          Show image resolution on all images?
+        </label>
+        <input type="checkbox" id="show-image-size-on-all" name="show-image-size-on-all">
+      </li>
+      <li>
+        <label class="option-label" for="show-image-size-underneath">
+          Show image resolution below images?
+        </label>
+        <input type="checkbox" id="show-image-size-on-underneath" name="show-image-size-on-underneath">
+      </li>
+    </ul>
   </div>
 
+  <a class="linkNote" href="https://github.com/jrie/googlePanicImage">googlePanicImage source code</a>
+  
   <script src="popup.js"></script>
 </body>
 </html>

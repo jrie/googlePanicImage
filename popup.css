@@ -1,49 +1,99 @@
 body {
-    background-color: #333;
-    color: #ccc;
-    margin: 1.3em 1.7em;
-    font-size: 1em;
-    font-family: monospace;
+    background-color: #272525;
+    color: #fcd6d6;
+    font-size: 1rem;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 1.7em 2em;
+    border: 1px solid #666;
 }
 
-h1,
-h2 {
+h1 {
     padding: 0;
     margin: 0;
     text-transform: uppercase;
-    margin-bottom: 0.3em;
-    font-size: 130%;
-}
-
-h2 {
-    font-size: 100%;
     margin-bottom: 1em;
+    font-size: 120%;
 }
 
-hr {
-    margin-bottom: 1.3em;
+a,
+p,
+ul,
+li,
+div {
+    padding: 0;
+    margin: 0;
 }
 
-label,
+.border {
+    border: 1px solid #666;
+}
+
+.optionsNote,
+.linkNote {
+    font-size: 90%;
+    background-color: #444;
+    color: #ccc;
+    padding: 2em 1em;
+}
+
+.linkNote {
+    background-color: transparent;
+    display: block;
+    margin-top: 2em;
+    padding: 0.8em 0.7em;
+    text-decoration: none;
+    text-align: right;
+    font-size: 70%;
+    cursor: pointer;
+}
+
+.linkNote:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    color: #fff;
+}
+
+.options {
+    list-style: none;
+    background-color: #4e4b4b;
+    margin: 0;
+    padding: 0;
+}
+
+label {
+    padding: 1.2em 1em;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 90%;
+    color: #fff;
+    line-height: 1em;
+    vertical-align: text-top;
+    cursor: pointer;
+    display: inline-block;
+    user-select: none;
+    padding: 1em 0.7em;
+    width: calc(100% - 2.6em - 1rem);
+}
+
+li:hover,
+label:hover {
+    background-color: #686464;
+}
+
 input {
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
     line-height: 1em;
     vertical-align: text-top;
 }
 
-input {
-    margin: 0;
-    padding: 0;
+input[type="checkbox"] {
+    margin: 1em 0.3em;
 }
 
 .optionsNote {
     border: 1px solid #444;
     padding: 0.7rem 1rem;
-}
-
-.option-label {
-    display: inline-block;
-    color: #aaa;
-    margin-bottom: 0.7em;
-    font-weight: bold;
-    margin-right: 0.7em;
+    font-size: 0.7rem;
 }

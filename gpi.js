@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------------
-// Google panic image v4.1.0 @ 17.05.2026
+// Google panic image v4.2.0 @ 18.05.2026
 // Author: Jan Riechers [ jan@dwrox.net ]
 // Ressource: https://github.com/jrie/googlePanicImage
 // ----------------------------------------------------------------------------------------
@@ -9,7 +9,7 @@ const GOOGLE_PANIC_CLASS = 'Google-panic-image';
 const GOOGLE_PANIC_CLASS_BTN = 'Google-panic-image-btn';
 const overlayClassSelector = 'div.' + GOOGLE_PANIC_CLASS;
 
-const gpiStyle = 'div.' + GOOGLE_PANIC_CLASS + ' { box-sizing: border-box; padding:0; margin:0; line-height: 1em; position: absolute; top: 12%; left: 0px; background: rgba(0,0,0,0.8); color: #fff; font-weight: normal; border-radius: 0px 9px 9px 0px; z-index: 5; font-size: 0.75rem; text-decoration: 0; border: 1px solid #777; border-left: 0; max-height: 2.2rem; display: block; } ' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' {color: #fff; line-height: 0.9rem; font-size: inherit; font-weight: bold; font-size: 0.75rem; text-decoration: 0; cursor:pointer; padding: 0; margin: 0; padding: 0.4rem 0.5rem 0.6em 0.5rem; display: block; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' > span { line-height: 0.9rem; padding: 0; margin: 0; margin-left: 0.5rem; font-weight: normal; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ':hover { font-weight: bold; text-decoration:underline; } .gpi-dimensions { position: absolute; border-radius: 1.7em; right: 0.7rem; bottom: 4rem; color:#99c3ff; line-height: 1.2rem; min-height: 1.2rem; font-size: 0.8em; font-weight: bold; margin-top: 0.3em; text-align: right; background-color: rgba(0,0,0,0.7); padding: 0.3rem 1.2em; }';
+const gpiStyle = 'div.' + GOOGLE_PANIC_CLASS + ' { box-sizing: border-box; padding:0; margin:0; vertical-align: middle; line-height: 1em; position: absolute; top: 12%; left: 0px; background: rgba(0,0,0,0.8); color: #fff; font-weight: normal; border-radius: 0px 9px 9px 0px; z-index: 5; font-size: 0.75rem; text-decoration: 0; border: 1px solid #777; border-left: 0; max-height: 2.2rem; display: block; } ' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' {color: #fff; line-height: 0.9rem; font-size: inherit; font-weight: bold; font-size: 0.75rem; text-decoration: 0; cursor:pointer; padding: 0; margin: 0; padding: 0.4rem 0.5rem 0.6em 0.5rem; display: block; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ' > span { line-height: 0.9rem; padding: 0; margin: 0; margin-left: 0.5rem; font-weight: normal; }' + 'a.' + GOOGLE_PANIC_CLASS_BTN + ':hover { font-weight: bold; text-decoration:underline; } .gpi-dimensions { position: absolute; border-radius: 1.7em; right: 0.5rem; bottom: 3.5rem; color: #99c3ff; line-height: 1.2rem; min-height: 1.2rem; font-size: 0.8em; font-weight: bold; background-color: rgba(0,0,0,0.7); padding: 0.3rem 0.8em; } .gpi-ds { font-size: 70%; } .gpi-ds.noabs { position: unset; border-radius: 0px; text-align: right; } [data-async-type="imgv"] .gpi-dsl.noabs { bottom: 4.7em; } .gpi-dsl, [data-async-type="imgv"] .gpi-dsl { position: absolute; bottom: 5em; } .gpi-dsl, .gpi-dsl.noabs { bottom: 1em; } .gpi-dl { bottom: 0.5rem; }';
 // -------------------------------------------------------------------------
 const debugShowType = false;
 const debugShowParsing = false;
@@ -23,7 +23,7 @@ if (window.location.search && !document.querySelector('body div#main[class="main
 }
 const useChrome = typeof (browser) === 'undefined';
 
-console.log('You are using GooglePanicImages v4.1.0');
+console.log('You are using GooglePanicImages v4.2.0');
 console.log(useChrome ? 'Running in a Chrome browser.' : 'Running in a non-Chrome browser.');
 console.log('We are in "operation mode ' + operationMode + '" which means we operate on "' + operationModeTitle + '"');
 console.log('If this mode differs from the current viewed page or you find a error, please open a bug ticket at: https://github.com/jrie/googlePanicImage');
@@ -390,6 +390,7 @@ function applyOptions (imgTarget, type) {
     if (hasDimensions) {
       return;
     }
+
     switch (type) {
       case 's':
         imgTarget.parentNode.parentNode.style = 'position:relative;';
@@ -403,7 +404,11 @@ function applyOptions (imgTarget, type) {
     }
 
     const dimensionSpan = document.createElement('span');
-    dimensionSpan.className = 'gpi-dimensions';
+    dimensionSpan.className = 'gpi-dimensions gpi-d' + type;
+
+    if (addonOptions['gpi-show-image-size-on-underneath']) {
+      dimensionSpan.className += ' noabs';
+    }
 
     const width = imgData.data[3][2];
     const height = imgData.data[3][1];

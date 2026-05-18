@@ -12,11 +12,14 @@
 		"default_title": "googlePanicImage",
 		"default_popup": "popup.html"
 	},
+    "options_ui": {
+        "page": "popup.html"
+    },
     "description": "Displays a 'view' link, 'image dimensions'  and 'picture size' on hover at images of Google image search and search.",
     "homepage_url": "https://github.com/jrie/googlePanicImage",
     "manifest_version": 3,
     "name": "GooglePanicImages",
-    "version": "4.1.0",
+    "version": "4.2.0",
     "permissions": [
         "tabs",
         "scripting",
@@ -27,7 +30,6 @@
             "background.js"
         ]
     },
-    
     "host_permissions": [
         "*://www.google.com/*",
         "*://www.google.ad/*",
