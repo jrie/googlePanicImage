@@ -5,9 +5,14 @@
     "name": "GooglePanicImages",
     "version": "4.2.0",
 	"action": {
-		"default_title": "googlePanicImage",
-		"default_popup": "popup.html"
-	},
+        "default_title": "googlePanicImage",
+        "default_popup": "popup.html",
+        "default_icon": {
+            "32": "icons/gpi_32_32.png",
+            "64": "icons/gpi_64_64.png",
+            "128": "icons/gpi_128_128.png"
+        }
+    },
     "options_ui": {
         "page": "popup.html"
     },
