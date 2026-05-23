@@ -1,5 +1,5 @@
 {
-    "description": "Displays a 'view' link, 'image dimensions'  and 'picture size' on hover at images of Google image search and search.",
+    "description": "Displays a 'view' link, 'image resolution/dimensions'  and 'picture size in bytes/kb or mb' on hover at images of Google image search.",
     "homepage_url": "https://github.com/jrie/googlePanicImage",
     "manifest_version": 3,
     "name": "GooglePanicImages",
@@ -22,9 +22,7 @@
         "storage"
     ],
     "background": {
-        "scripts": [
-            "background.js"
-        ]
+        "service_worker": "background.js"
     },
     "host_permissions": [
         "*://www.google.com/*",
