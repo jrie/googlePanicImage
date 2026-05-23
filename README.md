@@ -1,11 +1,12 @@
 # googlePanicImages | googlePanicImage
-Displays direct "view" link, "image size" and "picture sizes" on images at Google Image search.
+Use googlePanicImage to display a direct 'View' link, 'image resolution/dimensions' and 'size in byte/kb or mb" on hovered images at Google Image search.
+
+Also additional options are provided to configure and show image sizes directly below or on the images of the search.
 
 ## Screenshot of a Google image search
-<img width="1196" height="761" alt="Image of a search in Google images" src="https://github.com/user-attachments/assets/9ef6a4d6-896e-4a49-80ae-944d48a58ac9" />
+<img width="1280" height="800" alt="gpi basic feature" src="https://github.com/user-attachments/assets/afd90599-f769-416e-a7e3-84d94103fa0b" />
 
-## Summary
-Once GooglePanicImages is enabled, images on Google image search, which are mouse overed/hovered show a "View" button to open the image directly, and additional image details like dimensions/resolution and byte/kb/mb sizes are shown.
+## Privacy informations
 
 No additional requests to any of the websites are made, the data is.. "provided" ;)
 
