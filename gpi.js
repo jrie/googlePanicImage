@@ -318,6 +318,9 @@ function openImage (evt) {
     target = target.parentNode;
   }
 
+  evt.preventDefault();
+  evt.stopPropagation();
+
   window.open(target, '_blank');
 }
 
