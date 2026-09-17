@@ -4,7 +4,6 @@ const useChrome = typeof (browser) === 'undefined';
 function saveOptions (evt) {
   const optionPrefix = 'gpi-';
   let value = null;
-  let parent = false;
 
   switch (evt.target.type) {
     case 'checkbox':
@@ -14,41 +13,8 @@ function saveOptions (evt) {
       break;
   }
 
-  let connectedOptions = null;
-  let optionName = null;
-
-  switch (evt.target.name) {
-    case 'show-image-size-on-all':
-    case 'show-image-size-on-underneath':
-      connectedOptions = document.querySelectorAll('[name="show-image-size-on-all"], [name="show-image-size-on-underneath"]');
-      parent = 'show-image-size-on-all';
-
-      if (connectedOptions) {
-        parent = connectedOptions[0];
-
-        for (const option of connectedOptions) {
-          optionName = optionPrefix + option.name;
-
-          if (option !== parent) {
-            if (option.type === 'checkbox' && !value) {
-              option.checked = value;
-            }
-
-            if (option.type === 'checkbox') {
-              useChrome ? chrome.storage.local.set({ [optionName]: option.checked }) : browser.storage.local.set({ [optionName]: option.checked });
-            }
-          } else if (option === evt.target) {
-            if (option.type === 'checkbox') {
-              useChrome ? chrome.storage.local.set({ [optionName]: option.checked }) : browser.storage.local.set({ [optionName]: option.checked });
-            }
-          }
-        }
-      }
-
-      break;
-    default:
-      break;
-  }
+  let optionName = optionPrefix + evt.target.name;
+  useChrome ? chrome.storage.local.set({ [optionName]: value }) : browser.storage.local.set({ [optionName]: value });
 }
 
 function loadOptions (data) {

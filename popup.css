@@ -1,10 +1,10 @@
 body {
-    background-color: #272525;
-    color: #fcd6d6;
+    background-color: #2f2e67;
+    color: #f4e4e4;
     font-size: 1rem;
     font-family: Arial, Helvetica, sans-serif;
     padding: 1.7em 2em;
-    border: 1px solid #666;
+    border: 1px solid #e2d0d0;
 }
 
 h1 {
@@ -25,14 +25,13 @@ div {
 }
 
 .border {
-    border: 1px solid #666;
+    border: 1px solid #fcd6d6;
 }
 
 .optionsNote,
 .linkNote {
     font-size: 90%;
-    background-color: #444;
-    color: #ccc;
+    background-color: rgba(255, 255, 255, 0.12);
     padding: 2em 1em;
 }
 
@@ -45,27 +44,28 @@ div {
     text-align: right;
     font-size: 70%;
     cursor: pointer;
+    color: #fef3f3;
 }
 
 .linkNote:hover {
     text-decoration: underline;
     text-underline-offset: 0.3em;
-    color: #fff;
 }
 
 .options {
     list-style: none;
-    background-color: #4e4b4b;
+    background-color: rgba(255,255,255,0.2);
     margin: 0;
-    padding: 0;
+}
+
+.options li:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 label {
-    padding: 1.2em 1em;
     font-style: italic;
     font-weight: normal;
     font-size: 90%;
-    color: #fff;
     line-height: 1em;
     vertical-align: text-top;
     cursor: pointer;
@@ -73,11 +73,7 @@ label {
     user-select: none;
     padding: 1em 0.7em;
     width: calc(100% - 2.6em - 1rem);
-}
-
-li:hover,
-label:hover {
-    background-color: #686464;
+    color: #fef3f3;
 }
 
 input {
@@ -93,7 +89,6 @@ input[type="checkbox"] {
 }
 
 .optionsNote {
-    border: 1px solid #444;
     padding: 0.7rem 1rem;
     font-size: 0.7rem;
 }
