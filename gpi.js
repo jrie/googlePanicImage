@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------------
-// Google panic image v5.0.0 @ 17.09.2026
+// Google panic image v5.0.1 @ 26.09.2026
 // Author: Jan Riechers [ jan@dwrox.net ]
 // Ressource: https://github.com/jrie/googlePanicImage
 // ----------------------------------------------------------------------------------------
@@ -13,15 +13,13 @@ const gpiStyle = 'div.' + GOOGLE_PANIC_CLASS + ' { padding:0; margin:0; vertical
 // -------------------------------------------------------------------------
 let operationMode = 1;
 let operationModeTitle = 'Google regular image search';
-const useChrome = typeof (browser) === 'undefined';
 
 if (!document.body.querySelector('div#rcnt')) {
   operationMode = 2;
-  operationModeTitle = 'Google highlight image search'
+  operationModeTitle = 'Google highlight image search';
 }
 
-console.log('You are using GooglePanicImages v5.0.0');
-console.log(useChrome ? 'Running in a Chrome available browser.' : 'Running in a non-Chrome browser.');
+console.log('You are using GooglePanicImages v5.0.1');
 console.log('We are in "operation mode ' + operationMode + '" which means we operate on "' + operationModeTitle + '"');
 console.log('If this mode differs from the current viewed page or you find a error, please open a bug ticket at: https://github.com/jrie/googlePanicImage');
 
@@ -233,7 +231,7 @@ const operationModes = {
   }
 };
 
-let inInterval = false
+let inInterval = false;
 let count = 0;
 
 function selectImages() {
@@ -256,7 +254,7 @@ function selectImages() {
         continue;
       }
 
-      parseImage(img, type)
+      parseImage(img, type);
     }
   }
   inInterval = false;
@@ -265,7 +263,7 @@ function selectImages() {
 function parseImage(img, type) {
   addHandler(img, type);
   if (hasOptions) {
-    applyOptions(img, type)
+    applyOptions(img, type);
   } else {
     img.dataset.gpi = type;
   }
@@ -274,48 +272,52 @@ function parseImage(img, type) {
 // ------------------------------------------------------------------------------------------------
 
 function applyOptions(img, type) {
+  let imgContainer = null;
   switch (operationMode) {
     case 1:
-    default:
       switch (type) {
         case 's':
-          imgContainer = img.parentNode
+          imgContainer = img.parentNode;
           imgContainer.style = 'position:relative;';
-          imgContainer = img.parentNode.parentNode
+          imgContainer = img.parentNode.parentNode;
           break;
         case 'sl':
-          imgContainer = img.parentNode
+          imgContainer = img.parentNode;
           img.style = 'position:relative;';
           break;
         case 'l':
-          imgContainer = img
+          imgContainer = img;
           imgContainer.style = 'position:relative;';
           break;
+        default:
+          return;
       }
 
       break;
     case 2:
       switch (type) {
         case 'sl':
-          imgContainer = img
+          imgContainer = img;
           img.style = 'position:relative;';
           break;
         case 'l':
-          imgContainer = img
+          imgContainer = img;
           imgContainer.style = 'position:relative;';
           break;
       }
 
       break;
+    default:
+      return;
   }
 
   if (addonOptions['gpi-sisoa']) {
     if (operationMode === 1 || type !== 'l') {
-      const existing = imgContainer.querySelector('.gpi-dms')
+      const existing = imgContainer.querySelector('.gpi-dms');
       if (!existing) {
         const imgData = parseImageByType(img, type);
         if (!imgData) {
-          return
+          return;
         }
 
         const width = imgData.data[3][2];
@@ -332,9 +334,9 @@ function applyOptions(img, type) {
   }
 
   if (addonOptions['gpi-ht']) {
-    const textNode = imgContainer.querySelector('div[data-snf]:has(> a[data-sb])')
+    const textNode = imgContainer.querySelector('div[data-snf]:has(> a[data-sb])');
     if (textNode && !textNode.classList.contains('notext')) {
-      textNode.classList.add('notext')
+      textNode.classList.add('notext');
     }
   }
 
@@ -433,5 +435,4 @@ if (window.gpi) {
 
 window.requestAnimationFrame(addCSSStyle);
 window.requestAnimationFrame(selectImages);
-window.setInterval(selectImages, 1800)
-
+window.setInterval(selectImages, 1800);

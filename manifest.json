@@ -20,11 +20,11 @@
     "options_ui": {
         "page": "popup.html"
     },
-    "description": "Displays a 'view' link, 'image dimensions'  and 'picture size' on hover at images of Google image search and search.",
+    "description": "Displays a 'view' link, 'image dimensions'  and 'picture size' on hover at images of Google image search and image search",
     "homepage_url": "https://github.com/jrie/googlePanicImage",
     "manifest_version": 3,
     "name": "GooglePanicImages",
-    "version": "5.0.0",
+    "version": "5.0.1",
     "permissions": [
         "tabs",
         "scripting",
