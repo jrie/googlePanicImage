@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------------
-// Google panic image v5.0.1 @ 26.09.2026
+// Google panic image v5.0.2 @ 27.09.2026
 // Author: Jan Riechers [ jan@dwrox.net ]
 // Ressource: https://github.com/jrie/googlePanicImage
 // ----------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ if (!document.body.querySelector('div#rcnt')) {
   operationModeTitle = 'Google highlight image search';
 }
 
-console.log('You are using GooglePanicImages v5.0.1');
+console.log('You are using GooglePanicImages v5.0.2');
 console.log('We are in "operation mode ' + operationMode + '" which means we operate on "' + operationModeTitle + '"');
 console.log('If this mode differs from the current viewed page or you find a error, please open a bug ticket at: https://github.com/jrie/googlePanicImage');
 
@@ -334,7 +334,7 @@ function applyOptions(img, type) {
   }
 
   if (addonOptions['gpi-ht']) {
-    const textNode = imgContainer.querySelector('div[data-snf]:has(> a[data-sb])');
+    const textNode = imgContainer.querySelector('div[data-snf]:has(> a)');
     if (textNode && !textNode.classList.contains('notext')) {
       textNode.classList.add('notext');
     }
