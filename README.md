@@ -8,12 +8,13 @@ Also additional options are provided to configure and show image sizes directly 
 
 ## Privacy informations
 
-No additional requests to any of the websites are made, the data is.. "provided" ;)
+No additional requests to any of the websites are made, the data is.. "provided" by Google. ;)
 
-## Download as addon
-*Note*: The addon is current only published in "Version 4.x" for Firefox and Chrome, current dev/testing version is *version 5.x* (!!).
+## Download as addon/extension
+*Note*: The current addon/extension version should be "v5.x.x" and should be available for the below browsers.
 
-If the latest working version is released (v5.x, addon v4.x), the addon can be downloaded here (for reference): [Firefox](https://addons.mozilla.org/en-US/firefox/addon/googlepanicimages/) | [Chrome](https://chrome.google.com/webstore/detail/googlepanicimages/ofnokbendbpfgbomaepcomeciblhphip) | [Opera](https://addons.opera.com/en/extensions/details/googlepanicimages/) | [Edge](https://microsoftedge.microsoft.com/addons/detail/cllbfapjhkobfdechjnofjbgejdebdgn)
+See here:
+[Firefox](https://addons.mozilla.org/en-US/firefox/addon/googlepanicimages/) | [Chrome](https://chrome.google.com/webstore/detail/googlepanicimages/ofnokbendbpfgbomaepcomeciblhphip) | [Opera](https://addons.opera.com/en/extensions/details/googlepanicimages/) | [Edge](https://microsoftedge.microsoft.com/addons/detail/cllbfapjhkobfdechjnofjbgejdebdgn)
 
 ## Legacy notes
 Version v1, v2, v3, and v4 are in place for historical reasons."gpi.js" is always the current version.
