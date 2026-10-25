@@ -3,11 +3,14 @@ Use googlePanicImage to display a direct 'View' link, 'image resolution/dimensio
 
 Also additional options are provided to configure and show image sizes directly on the images of the search or hide images texts.
 
+## Working/non-working state of the addon/extension
+Due to changes in Google search the addon is broken - I am aware of that.
+Please use the issue https://github.com/jrie/googlePanicImage/issues/19 in order to track changes.
+
 ## Screenshot of a Google image search (v4.x) - current (v5.x)
 <img width="1280" height="800" alt="gpi basic feature" src="https://github.com/user-attachments/assets/afd90599-f769-416e-a7e3-84d94103fa0b" />
 
 ## Privacy informations
-
 No additional requests to any of the websites are made, the data is.. "provided" by Google. ;)
 
 ## Download as addon/extension
